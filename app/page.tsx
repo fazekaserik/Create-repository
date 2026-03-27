@@ -6,34 +6,34 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { setState } from '@/lib/store'
 import type { Goal, GymType, DietType } from '@/lib/types'
 
-type Step = 'upload' | 'goal' | 'gym' | 'diet'
+type Step = 'landing' | 'upload' | 'goal' | 'gym' | 'diet'
 
-const GOALS: { value: Goal; label: string; emoji: string; desc: string }[] = [
-  { value: 'cut', label: 'Get Lean', emoji: '⚡', desc: 'Cut fat, keep muscle' },
-  { value: 'build', label: 'Build Muscle', emoji: '💪', desc: 'Lean muscle gains' },
-  { value: 'bulk', label: 'Get Big', emoji: '🏋️', desc: 'Max size & strength' },
+const GOALS: { value: Goal; label: string; desc: string }[] = [
+  { value: 'cut', label: 'Get Lean', desc: 'Lose fat, keep muscle' },
+  { value: 'build', label: 'Build Muscle', desc: 'Lean muscle gains' },
+  { value: 'bulk', label: 'Get Big', desc: 'Maximum size & strength' },
 ]
 
-const GYMS: { value: GymType; label: string; emoji: string }[] = [
-  { value: 'gym', label: 'Gym', emoji: '🏢' },
-  { value: 'home', label: 'Home', emoji: '🏠' },
+const GYMS: { value: GymType; label: string }[] = [
+  { value: 'gym', label: 'Gym' },
+  { value: 'home', label: 'Home' },
 ]
 
-const DIETS: { value: DietType; label: string; emoji: string }[] = [
-  { value: 'standard', label: 'Standard', emoji: '🍽️' },
-  { value: 'keto', label: 'Keto', emoji: '🥩' },
-  { value: 'vegan', label: 'Vegan', emoji: '🌱' },
-  { value: 'carnivore', label: 'Carnivore', emoji: '🥩' },
+const DIETS: { value: DietType; label: string }[] = [
+  { value: 'standard', label: 'Standard' },
+  { value: 'keto', label: 'Keto' },
+  { value: 'vegan', label: 'Vegan' },
+  { value: 'carnivore', label: 'Carnivore' },
 ]
 
 export default function OnboardingPage() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [step, setStep] = useState<Step>('upload')
+  const [step, setStep] = useState<Step>('landing')
   const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [goal, setGoal] = useState<Goal | null>(null)
-  const [gym, setGym] = useState<GymType | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null)
+  const [selectedGym, setSelectedGym] = useState<GymType | null>(null)
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) return
@@ -42,7 +42,7 @@ export default function OnboardingPage() {
       const dataUrl = e.target?.result as string
       setImagePreview(dataUrl)
       setState({ uploadedImageDataUrl: dataUrl })
-      setTimeout(() => setStep('goal'), 300)
+      setTimeout(() => setStep('goal'), 400)
     }
     reader.readAsDataURL(file)
   }, [])
@@ -55,15 +55,15 @@ export default function OnboardingPage() {
   }, [handleFile])
 
   const handleGoalSelect = (g: Goal) => {
-    setGoal(g)
+    setSelectedGoal(g)
     setState({ goal: g })
-    setTimeout(() => setStep('gym'), 200)
+    setTimeout(() => setStep('gym'), 220)
   }
 
   const handleGymSelect = (g: GymType) => {
-    setGym(g)
+    setSelectedGym(g)
     setState({ gymType: g })
-    setTimeout(() => setStep('diet'), 200)
+    setTimeout(() => setStep('diet'), 220)
   }
 
   const handleDietSelect = (d: DietType) => {
@@ -71,183 +71,203 @@ export default function OnboardingPage() {
     router.push('/loading')
   }
 
+  const slideIn = {
+    initial: { opacity: 0, x: 40 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -40 },
+    transition: { duration: 0.25 },
+  }
+
   return (
-    <main className="min-h-screen bg-black flex flex-col items-center justify-center px-5 py-8">
-      {/* Logo */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8 text-center"
-      >
-        <h1 className="text-3xl font-black tracking-tight neon-green">NextBody</h1>
-        <p className="text-xs text-white/40 mt-1 tracking-widest uppercase">AI Body Transformation</p>
-      </motion.div>
+    <main className="min-h-screen radial-bg flex flex-col">
 
-      <div className="w-full max-w-sm">
-        <AnimatePresence mode="wait">
-
-          {/* STEP: Upload */}
-          {step === 'upload' && (
-            <motion.div
-              key="upload"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-white mb-2">See your future body</h2>
-                <p className="text-white/50 text-sm">Upload a full body photo to begin</p>
+      {/* LANDING */}
+      <AnimatePresence mode="wait">
+        {step === 'landing' && (
+          <motion.div
+            key="landing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="flex flex-col items-center justify-between min-h-screen px-6 py-12"
+          >
+            {/* Logo */}
+            <div className="text-center mt-8">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl border border-[var(--teal)] flex items-center justify-center text-xl">⚡</div>
+                <h1 className="text-4xl font-black tracking-tight">
+                  Next<span className="teal-glow">Body</span>
+                </h1>
               </div>
+              <p className="text-[var(--text-muted)] text-sm">10,000+ body scans completed</p>
+              <p className="text-[var(--text-muted)] text-sm">Unlock your top 20% physique in 90 days</p>
+            </div>
 
-              <div
-                className={`relative rounded-2xl border-2 border-dashed transition-all duration-200 cursor-pointer overflow-hidden
-                  ${isDragging
-                    ? 'border-[#00ff88] bg-[rgba(0,255,136,0.08)]'
-                    : 'border-white/20 bg-white/[0.03] hover:border-white/40 hover:bg-white/[0.05]'
-                  }`}
-                style={{ minHeight: 260 }}
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
-                onDragLeave={() => setIsDragging(false)}
-                onDrop={handleDrop}
+            {/* Feature list */}
+            <div className="w-full max-w-sm space-y-3 mt-6">
+              {[
+                'AI Physique Rating & Analysis',
+                'See Your 90-Day Transformation',
+                'Personalized Training Plan',
+                'Elite Body Optimization',
+              ].map((f) => (
+                <div key={f} className="flex items-center gap-3">
+                  <span className="teal font-bold text-lg">✓</span>
+                  <span className="text-white text-sm font-medium">{f}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <div className="w-full max-w-sm mt-8 space-y-3">
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setStep('upload')}
+                className="btn-primary w-full py-4 pulse-teal"
               >
-                {imagePreview ? (
-                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" style={{ minHeight: 260 }} />
-                ) : (
-                  <div className="flex flex-col items-center justify-center p-10 text-center" style={{ minHeight: 260 }}>
-                    <div className="text-5xl mb-4 float">📸</div>
-                    <p className="text-white font-semibold mb-1">Tap to upload photo</p>
-                    <p className="text-white/40 text-xs">Full body photo works best</p>
+                Scan My Body →
+              </motion.button>
+              <p className="text-center text-[var(--text-dim)] text-xs">
+                Takes less than 10 seconds
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* UPLOAD */}
+        {step === 'upload' && (
+          <motion.div key="upload" {...slideIn} className="flex flex-col min-h-screen px-6 py-10">
+            <button onClick={() => setStep('landing')} className="text-[var(--text-muted)] text-sm mb-8">‹ Back</button>
+
+            <h2 className="text-3xl font-black text-white mb-2">Upload your photo</h2>
+            <p className="text-[var(--text-muted)] text-sm mb-8">Full body photo works best for accurate analysis</p>
+
+            <div
+              className={`relative flex-1 max-h-96 rounded-3xl border-2 border-dashed transition-all duration-200 cursor-pointer overflow-hidden
+                ${isDragging ? 'border-[var(--teal)] bg-[var(--teal-dim)]' : 'border-white/15 bg-white/[0.03] hover:border-white/30'}`}
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleDrop}
+            >
+              {imagePreview ? (
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full p-10 text-center" style={{ minHeight: 300 }}>
+                  <div className="text-6xl mb-5 float">📸</div>
+                  <p className="text-white font-semibold text-base">Tap to upload</p>
+                  <p className="text-[var(--text-dim)] text-sm mt-1">or drag & drop</p>
+                </div>
+              )}
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]) }}
+            />
+
+            <div className="flex justify-center gap-4 mt-6 text-xs text-[var(--text-dim)]">
+              <span>🔒 Private & encrypted</span>
+              <span>⚡ AI analysis in seconds</span>
+            </div>
+          </motion.div>
+        )}
+
+        {/* GOAL */}
+        {step === 'goal' && (
+          <motion.div key="goal" {...slideIn} className="flex flex-col min-h-screen px-6 py-10">
+            <button onClick={() => setStep('upload')} className="text-[var(--text-muted)] text-sm mb-8">‹ Back</button>
+            <h2 className="text-3xl font-black text-white mb-2">What's your goal?</h2>
+            <p className="text-[var(--text-muted)] text-sm mb-8">We'll tailor your transformation preview</p>
+            <div className="flex flex-col gap-3">
+              {GOALS.map((g) => (
+                <motion.button
+                  key={g.value}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleGoalSelect(g.value)}
+                  className={`w-full flex items-center justify-between p-5 rounded-2xl transition-all duration-200 text-left
+                    ${selectedGoal === g.value ? 'card-teal' : 'card hover:border-white/20'}`}
+                >
+                  <div>
+                    <div className={`font-bold text-base ${selectedGoal === g.value ? 'teal' : 'text-white'}`}>{g.label}</div>
+                    <div className="text-[var(--text-muted)] text-sm mt-0.5">{g.desc}</div>
                   </div>
-                )}
-              </div>
+                  <div className={`text-lg ${selectedGoal === g.value ? 'teal' : 'text-white/20'}`}>›</div>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]) }}
+        {/* GYM */}
+        {step === 'gym' && (
+          <motion.div key="gym" {...slideIn} className="flex flex-col min-h-screen px-6 py-10">
+            <button onClick={() => setStep('goal')} className="text-[var(--text-muted)] text-sm mb-8">‹ Back</button>
+            <h2 className="text-3xl font-black text-white mb-2">Where do you train?</h2>
+            <p className="text-[var(--text-muted)] text-sm mb-8">Affects your workout plan</p>
+            <div className="grid grid-cols-2 gap-3">
+              {GYMS.map((g) => (
+                <motion.button
+                  key={g.value}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleGymSelect(g.value)}
+                  className={`flex flex-col items-center justify-center gap-3 p-8 rounded-2xl transition-all duration-200
+                    ${selectedGym === g.value ? 'card-teal' : 'card hover:border-white/20'}`}
+                >
+                  <span className="text-4xl">{g.value === 'gym' ? '🏢' : '🏠'}</span>
+                  <span className={`font-bold ${selectedGym === g.value ? 'teal' : 'text-white'}`}>{g.label}</span>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* DIET */}
+        {step === 'diet' && (
+          <motion.div key="diet" {...slideIn} className="flex flex-col min-h-screen px-6 py-10">
+            <button onClick={() => setStep('gym')} className="text-[var(--text-muted)] text-sm mb-8">‹ Back</button>
+            <h2 className="text-3xl font-black text-white mb-2">Diet preference?</h2>
+            <p className="text-[var(--text-muted)] teal text-sm mb-8 font-semibold">Last step 🎯</p>
+            <div className="grid grid-cols-2 gap-3">
+              {DIETS.map((d) => (
+                <motion.button
+                  key={d.value}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleDietSelect(d.value)}
+                  className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl card hover:border-[var(--teal)] transition-all duration-200"
+                >
+                  <span className="text-3xl">{d.value === 'standard' ? '🍽️' : d.value === 'keto' ? '🥑' : d.value === 'vegan' ? '🌱' : '🥩'}</span>
+                  <span className="font-semibold text-white text-sm">{d.label}</span>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Progress dots (not on landing) */}
+      {step !== 'landing' && (
+        <div className="fixed bottom-8 left-0 right-0 flex justify-center gap-2 pointer-events-none">
+          {(['upload', 'goal', 'gym', 'diet'] as const).map((s, i) => {
+            const stepIdx = ['upload', 'goal', 'gym', 'diet'].indexOf(step)
+            return (
+              <div
+                key={s}
+                className="rounded-full transition-all duration-300"
+                style={{
+                  width: step === s ? 24 : 8,
+                  height: 8,
+                  background: step === s ? 'var(--teal)' : i < stepIdx ? 'rgba(92,224,208,0.4)' : 'rgba(255,255,255,0.15)',
+                }}
               />
-
-              <div className="mt-6 flex gap-3 text-xs text-white/30 justify-center">
-                <span>🔒 Private & secure</span>
-                <span>·</span>
-                <span>⚡ Results in seconds</span>
-              </div>
-            </motion.div>
-          )}
-
-          {/* STEP: Goal */}
-          {step === 'goal' && (
-            <motion.div
-              key="goal"
-              initial={{ opacity: 0, x: 60 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -60 }}
-              transition={{ duration: 0.25 }}
-            >
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-white mb-2">What's your goal?</h2>
-                <p className="text-white/40 text-sm">Choose one</p>
-              </div>
-              <div className="flex flex-col gap-3">
-                {GOALS.map((g) => (
-                  <motion.button
-                    key={g.value}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => handleGoalSelect(g.value)}
-                    className="w-full flex items-center gap-4 p-4 rounded-2xl glass border border-white/10 hover:border-[#00ff88]/50 transition-all duration-200 text-left"
-                  >
-                    <span className="text-3xl">{g.emoji}</span>
-                    <div>
-                      <div className="font-bold text-white">{g.label}</div>
-                      <div className="text-white/40 text-xs">{g.desc}</div>
-                    </div>
-                    <div className="ml-auto text-white/20">›</div>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* STEP: Gym or Home */}
-          {step === 'gym' && (
-            <motion.div
-              key="gym"
-              initial={{ opacity: 0, x: 60 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -60 }}
-              transition={{ duration: 0.25 }}
-            >
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-white mb-2">Where do you train?</h2>
-                <p className="text-white/40 text-sm">We'll tailor your plan</p>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {GYMS.map((g) => (
-                  <motion.button
-                    key={g.value}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleGymSelect(g.value)}
-                    className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl glass border border-white/10 hover:border-[#00ff88]/50 transition-all duration-200"
-                  >
-                    <span className="text-4xl">{g.emoji}</span>
-                    <span className="font-bold text-white">{g.label}</span>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* STEP: Diet */}
-          {step === 'diet' && (
-            <motion.div
-              key="diet"
-              initial={{ opacity: 0, x: 60 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -60 }}
-              transition={{ duration: 0.25 }}
-            >
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-white mb-2">Diet preference?</h2>
-                <p className="text-white/40 text-sm">Last step 🎯</p>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {DIETS.map((d) => (
-                  <motion.button
-                    key={d.value}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleDietSelect(d.value)}
-                    className="flex flex-col items-center justify-center gap-3 p-5 rounded-2xl glass border border-white/10 hover:border-[#00ff88]/50 transition-all duration-200"
-                  >
-                    <span className="text-3xl">{d.emoji}</span>
-                    <span className="font-semibold text-white text-sm">{d.label}</span>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Progress dots */}
-      <div className="flex gap-2 mt-8">
-        {(['upload', 'goal', 'gym', 'diet'] as Step[]).map((s, i) => (
-          <div
-            key={s}
-            className={`rounded-full transition-all duration-300 ${
-              step === s
-                ? 'w-6 h-2 bg-[#00ff88]'
-                : i < (['upload', 'goal', 'gym', 'diet'] as Step[]).indexOf(step)
-                  ? 'w-2 h-2 bg-[#00ff88]/60'
-                  : 'w-2 h-2 bg-white/20'
-            }`}
-          />
-        ))}
-      </div>
+            )
+          })}
+        </div>
+      )}
     </main>
   )
 }

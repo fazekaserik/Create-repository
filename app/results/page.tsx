@@ -10,10 +10,10 @@ import PaywallModal from '@/components/PaywallModal'
 import BeforeAfterSlider from '@/components/BeforeAfterSlider'
 import ShareButton from '@/components/ShareButton'
 
-const PERIODS: { value: TransformPeriod; label: string }[] = [
-  { value: '1month', label: '1 Month' },
-  { value: '3months', label: '3 Months' },
-  { value: '6months', label: '6 Months' },
+const PERIODS: { value: TransformPeriod; label: string; short: string }[] = [
+  { value: '1month', label: '1 Month', short: '1M' },
+  { value: '3months', label: '3 Months', short: '3M' },
+  { value: '6months', label: '6 Months', short: '6M' },
 ]
 
 export default function ResultsPage() {
@@ -21,155 +21,127 @@ export default function ResultsPage() {
   const [revealed, setRevealed] = useState(false)
   const [activePeriod, setActivePeriod] = useState<TransformPeriod>('1month')
   const [showPaywall, setShowPaywall] = useState(false)
-  const [state, setLocalState] = useState(getState())
-  const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [appState, setAppState] = useState(getState())
+  const revealRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     const s = getState()
-    if (!s.uploadedImageDataUrl) {
-      router.push('/')
-      return
-    }
-    setLocalState(s)
+    if (!s.uploadedImageDataUrl) { router.push('/'); return }
+    setAppState(s)
     setActivePeriod(s.activePeriod || '1month')
-
-    // Trigger the wow reveal after a short delay
-    revealTimerRef.current = setTimeout(() => setRevealed(true), 400)
-    return () => { if (revealTimerRef.current) clearTimeout(revealTimerRef.current) }
+    revealRef.current = setTimeout(() => setRevealed(true), 500)
+    return () => { if (revealRef.current) clearTimeout(revealRef.current) }
   }, [router])
 
   const handlePeriodSelect = useCallback((period: TransformPeriod) => {
-    if (period !== '1month' && state.tier === 'free') {
+    if (period !== '1month' && appState.tier === 'free') {
       setShowPaywall(true)
       return
     }
     setActivePeriod(period)
     setState({ activePeriod: period })
-  }, [state.tier])
+  }, [appState.tier])
 
   const handlePaywallSuccess = useCallback((tier: 'weekly' | 'monthly') => {
     setState({ tier })
-    setLocalState(getState())
+    const s = getState()
+    setAppState(s)
     setShowPaywall(false)
-    // Unlock 3-month by default after payment
     setActivePeriod('3months')
     setState({ activePeriod: '3months' })
   }, [])
 
-  const currentImage = state.transformations?.[activePeriod]
-  const isLocked = activePeriod !== '1month' && state.tier === 'free'
-  const stats = state.goal ? STATS[state.goal as Goal]?.[activePeriod] : null
+  const currentImage = appState.transformations?.[activePeriod]
+  const isLocked = activePeriod !== '1month' && appState.tier === 'free'
+  const stats = appState.goal ? STATS[appState.goal as Goal]?.[activePeriod] : null
 
   return (
-    <main className="min-h-screen bg-black flex flex-col pb-safe">
+    <main className="min-h-screen radial-bg flex flex-col pb-10">
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-6 pb-3">
-        <button
-          onClick={() => router.push('/')}
-          className="text-white/40 text-sm hover:text-white/70 transition-colors"
-        >
-          ← Start over
-        </button>
-        <h1 className="text-base font-black neon-green">NextBody</h1>
+        <button onClick={() => router.push('/rating')} className="text-[var(--text-muted)] text-sm">‹ Back</button>
+        <h1 className="text-base font-black teal">NextBody</h1>
         <div className="w-16" />
       </div>
 
-      {/* WOW MOMENT: Split reveal */}
       <AnimatePresence>
         {!revealed ? (
-          <motion.div
-            key="loading-placeholder"
-            className="flex-1 flex items-center justify-center"
-            exit={{ opacity: 0 }}
-          >
-            <div className="text-center">
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-                className="text-5xl mb-4"
-              >
-                ⚡
-              </motion.div>
-              <p className="text-white/50 text-sm">Preparing your reveal…</p>
-            </div>
+          <motion.div key="placeholder" exit={{ opacity: 0 }} className="flex-1 flex items-center justify-center">
+            <motion.div animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+              <span style={{ fontSize: 52 }}>⚡</span>
+            </motion.div>
           </motion.div>
         ) : (
-          <motion.div
-            key="results"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col flex-1"
-          >
+          <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="flex flex-col flex-1">
+
             {/* Headline */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
+              transition={{ delay: 0.15, duration: 0.5 }}
               className="text-center px-5 mb-4"
             >
               <h2 className="text-2xl font-black text-white leading-tight">
                 {activePeriod === '1month' && 'Your first month result'}
-                {activePeriod === '3months' && (
-                  <span>This could be you in <span className="neon-green">90 days</span></span>
-                )}
-                {activePeriod === '6months' && (
-                  <span>Your <span className="neon-green">6-month</span> potential</span>
-                )}
+                {activePeriod === '3months' && <>This could be you in <span className="teal-glow">90 days</span></>}
+                {activePeriod === '6months' && <>Your <span className="teal-glow">6-month</span> potential</>}
               </h2>
               {stats && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="flex gap-3 justify-center mt-2"
+                  className="flex gap-2 justify-center mt-2"
                 >
-                  <span className="text-xs px-3 py-1 rounded-full bg-[rgba(0,255,136,0.12)] text-[#00ff88] font-semibold">
+                  <span className="text-xs px-3 py-1 rounded-full font-semibold teal"
+                    style={{ background: 'rgba(92,224,208,0.12)' }}>
                     {stats.muscle}
                   </span>
-                  <span className="text-xs px-3 py-1 rounded-full bg-[rgba(0,212,255,0.12)] text-[#00d4ff] font-semibold">
+                  <span className="text-xs px-3 py-1 rounded-full font-semibold text-white"
+                    style={{ background: 'rgba(255,255,255,0.08)' }}>
                     {stats.fat}
                   </span>
                 </motion.div>
               )}
             </motion.div>
 
-            {/* Before / After slider */}
+            {/* Before/After slider */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
+              initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-              className="relative mx-4 rounded-2xl overflow-hidden"
+              transition={{ delay: 0.25, duration: 0.6 }}
+              className="relative mx-4 rounded-3xl overflow-hidden"
               style={{ aspectRatio: '3/4' }}
             >
-              {state.uploadedImageDataUrl && currentImage ? (
+              {appState.uploadedImageDataUrl && currentImage ? (
                 <BeforeAfterSlider
-                  beforeUrl={state.uploadedImageDataUrl}
+                  beforeUrl={appState.uploadedImageDataUrl}
                   afterUrl={currentImage}
                   isLocked={isLocked}
                 />
               ) : (
-                <div className="w-full h-full shimmer rounded-2xl" />
+                <div className="w-full h-full shimmer rounded-3xl" />
               )}
 
-              {/* Locked overlay */}
               {isLocked && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-10"
+                  className="absolute inset-0 flex flex-col items-center justify-center z-10"
+                  style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}
                 >
                   <div className="text-4xl mb-3">🔒</div>
-                  <p className="text-white font-bold text-lg mb-1">Unlock your full transformation</p>
-                  <p className="text-white/50 text-sm mb-5 text-center px-6">
-                    See your {activePeriod === '3months' ? '3-month' : '6-month'} result
+                  <p className="text-white font-bold text-lg mb-1">Unlock full transformation</p>
+                  <p className="text-[var(--text-muted)] text-sm mb-5 text-center px-8">
+                    See your {activePeriod === '3months' ? '3-month' : '6-month'} physique result
                   </p>
                   <motion.button
                     whileTap={{ scale: 0.97 }}
                     onClick={() => setShowPaywall(true)}
-                    className="btn-neon px-8 py-3 rounded-2xl text-base font-bold pulse-glow"
+                    className="btn-primary px-8 py-3 pulse-teal"
+                    style={{ fontSize: 15 }}
                   >
-                    Unlock Now
+                    Unlock Now →
                   </motion.button>
                 </motion.div>
               )}
@@ -177,29 +149,30 @@ export default function ResultsPage() {
 
             {/* Period selector */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 0.45 }}
               className="flex gap-2 mx-4 mt-4"
             >
               {PERIODS.map((p) => {
-                const locked = p.value !== '1month' && state.tier === 'free'
+                const locked = p.value !== '1month' && appState.tier === 'free'
                 const isActive = activePeriod === p.value
                 return (
                   <button
                     key={p.value}
                     onClick={() => handlePeriodSelect(p.value)}
-                    className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 relative
-                      ${isActive
-                        ? 'bg-[#00ff88] text-black shadow-lg'
-                        : 'bg-white/[0.06] text-white/60 hover:bg-white/10'
-                      }`}
-                    style={isActive ? { boxShadow: '0 0 20px rgba(0,255,136,0.5)' } : {}}
+                    className="flex-1 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 relative"
+                    style={{
+                      background: isActive ? 'var(--teal)' : 'rgba(255,255,255,0.06)',
+                      color: isActive ? '#000' : 'rgba(255,255,255,0.55)',
+                      boxShadow: isActive ? '0 0 20px rgba(92,224,208,0.5)' : 'none',
+                    }}
                   >
-                    {locked && <span className="mr-1">🔒</span>}
+                    {locked && <span className="mr-1 text-xs">🔒</span>}
                     {p.label}
                     {p.value === '3months' && !locked && (
-                      <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 text-[9px] bg-[#00ff88] text-black px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">
+                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] px-1.5 py-0.5 rounded-full font-black whitespace-nowrap"
+                        style={{ background: 'var(--teal)', color: '#000' }}>
                         BEST
                       </span>
                     )}
@@ -208,53 +181,50 @@ export default function ResultsPage() {
               })}
             </motion.div>
 
-            {/* Psychological triggers */}
+            {/* Psychological trigger */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}
-              className="mx-4 mt-4 p-4 rounded-2xl glass"
+              className="mx-4 mt-4 p-4 rounded-2xl text-center"
+              style={{ background: 'rgba(92,224,208,0.05)', border: '1px solid rgba(92,224,208,0.15)' }}
             >
-              <p className="text-white/60 text-xs text-center leading-relaxed">
-                <span className="text-[#00ff88]">✦</span> Most users see visible results in 60–90 days
-                <br />
-                <span className="text-[#00d4ff]">✦</span> You&apos;re closer than you think
+              <p className="text-[var(--text-muted)] text-xs leading-relaxed">
+                <span className="teal font-semibold">✦</span> Most users see visible results in 60–90 days<br />
+                <span className="teal font-semibold">✦</span> You&apos;re closer than you think
               </p>
             </motion.div>
 
-            {/* CTA section */}
+            {/* CTA */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 }}
-              className="mx-4 mt-4 flex flex-col gap-3"
+              transition={{ delay: 1 }}
+              className="mx-4 mt-4"
             >
-              {state.tier === 'free' ? (
+              {appState.tier === 'free' ? (
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setShowPaywall(true)}
-                  className="btn-neon w-full py-4 rounded-2xl text-base font-bold pulse-glow"
+                  className="btn-primary w-full py-4 pulse-teal"
                 >
                   Unlock Full Transformation →
                 </motion.button>
               ) : (
                 <ShareButton
-                  beforeUrl={state.uploadedImageDataUrl || ''}
+                  beforeUrl={appState.uploadedImageDataUrl || ''}
                   afterUrl={currentImage || ''}
                 />
               )}
             </motion.div>
-
-            <div className="h-8" />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Paywall Modal */}
       <AnimatePresence>
         {showPaywall && (
           <PaywallModal
-            previewImageUrl={state.transformations?.['3months']}
+            previewImageUrl={appState.transformations?.['3months']}
             onClose={() => setShowPaywall(false)}
             onSuccess={handlePaywallSuccess}
           />

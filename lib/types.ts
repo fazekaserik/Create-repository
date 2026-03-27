@@ -40,3 +40,15 @@ export interface ClassifyResponse {
 export interface TransformResponse {
   imageUrl: string
 }
+
+export interface PhysiqueRating {
+  overall: number          // 1-10
+  attractiveness: number   // 1-10
+  physique: number         // 1-10
+  ratios: number           // 1-10
+  shoulderWidth: number    // 1-10
+  potential: number        // 1-10
+  bodyFatEstimate: string  // e.g. "18-22%"
+  percentile: number       // 0-100
+  summary: string          // one-line brutal truth
+}

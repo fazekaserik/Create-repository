@@ -98,8 +98,8 @@ export default function BeforeAfterSlider({ beforeUrl, afterUrl, isLocked = fals
       </motion.div>
 
       {/* Watermark */}
-      <div className="absolute bottom-3 left-3 text-white/70 text-xs font-bold"
-        style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
+      <div className="absolute bottom-3 left-3 text-xs font-black"
+        style={{ color: 'var(--teal)', textShadow: '0 0 8px rgba(92,224,208,0.6), 0 1px 4px rgba(0,0,0,0.8)' }}>
         NextBody
       </div>
     </div>

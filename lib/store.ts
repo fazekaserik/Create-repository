@@ -3,7 +3,7 @@
 // Simple sessionStorage-backed store so state survives page navigation
 // without requiring a heavy state library
 
-import type { Goal, GymType, DietType, BodyType, TransformPeriod } from './types'
+import type { Goal, GymType, DietType, BodyType, TransformPeriod, PhysiqueRating } from './types'
 
 export interface AppState {
   // onboarding
@@ -17,6 +17,8 @@ export interface AppState {
   sex: 'male' | 'female' | null
   // transformation results — keyed by period
   transformations: Partial<Record<TransformPeriod, string>>
+  // physique rating
+  rating: PhysiqueRating | null
   // subscription
   tier: 'free' | 'weekly' | 'monthly'
   activePeriod: TransformPeriod
@@ -33,6 +35,7 @@ const defaults: AppState = {
   bodyType: null,
   sex: null,
   transformations: {},
+  rating: null,
   tier: 'free',
   activePeriod: '1month',
 }
