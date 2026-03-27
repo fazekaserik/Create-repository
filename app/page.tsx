@@ -7,37 +7,25 @@ export default function WelcomePage() {
   const router = useRouter()
 
   return (
-    <main className="min-h-dvh flex flex-col overflow-hidden" style={{ background: '#000' }}>
+    <main className="min-h-dvh flex flex-col overflow-hidden">
 
-      {/* ── White section with phone ── */}
+      {/* ── White section ── */}
       <div
-        className="relative flex items-center justify-center"
-        style={{
-          background: '#fff',
-          height: '58vh',
-          overflow: 'visible',
-        }}
+        className="relative overflow-visible"
+        style={{ background: '#fff', height: '56vh', flexShrink: 0 }}
       >
-        {/* Language selector — top right */}
+        {/* Language selector */}
         <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 20 }}>
           <button
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              background: '#fff',
-              border: '1px solid rgba(0,0,0,0.1)',
-              borderRadius: 20,
-              padding: '6px 12px',
-              fontSize: 14,
-              fontWeight: 600,
-              color: '#000',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: '#fff', border: '1px solid rgba(0,0,0,0.1)',
+              borderRadius: 22, padding: '7px 13px',
+              fontSize: 14, fontWeight: 600, color: '#000',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.13)', cursor: 'pointer',
             }}
           >
-            {/* Mini flag SVG */}
-            <svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
               <rect width="20" height="14" rx="2" fill="#B22234"/>
               <rect y="1.08" width="20" height="1.08" fill="white"/>
               <rect y="3.23" width="20" height="1.08" fill="white"/>
@@ -45,32 +33,30 @@ export default function WelcomePage() {
               <rect y="7.54" width="20" height="1.08" fill="white"/>
               <rect y="9.69" width="20" height="1.08" fill="white"/>
               <rect y="11.85" width="20" height="1.08" fill="white"/>
-              <rect width="8" height="7.54" rx="0" fill="#3C3B6E"/>
+              <rect width="8" height="7.54" fill="#3C3B6E"/>
             </svg>
             EN
           </button>
         </div>
 
-        {/* Phone frame */}
+        {/* Phone — anchored from TOP so the top is always visible */}
         <div
           style={{
             position: 'absolute',
-            bottom: -36,        /* bleeds into black section */
+            top: 16,                  /* small gap from top — keeps top of phone in view */
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '68vw',
-            maxWidth: 268,
-            aspectRatio: '9/19.5',
-            borderRadius: 42,
-            /* Layered silver border */
-            border: '8px solid',
-            borderColor: '#c8c8c8',
+            width: '62vw',
+            maxWidth: 248,
+            height: '54vh',           /* explicit height, not aspect-ratio derived */
+            borderRadius: 40,
+            border: '7px solid #c2c2c2',
             boxShadow: [
-              '0 0 0 1px #b0b0b0',
-              '0 0 0 2px #d8d8d8',
-              'inset 0 0 0 1px rgba(0,0,0,0.15)',
-              '0 30px 80px rgba(0,0,0,0.22)',
-              '0 6px 20px rgba(0,0,0,0.12)',
+              '0 0 0 1px #aaa',
+              '0 0 0 2.5px #d8d8d8',
+              'inset 0 0 0 1px rgba(0,0,0,0.12)',
+              '0 28px 70px rgba(0,0,0,0.18)',
+              '0 4px 16px rgba(0,0,0,0.1)',
             ].join(', '),
             background: '#0a0a0a',
             overflow: 'hidden',
@@ -81,114 +67,96 @@ export default function WelcomePage() {
           <div style={{
             position: 'absolute', top: 10, left: '50%',
             transform: 'translateX(-50%)',
-            width: '34%', height: 26,
-            background: '#000', borderRadius: 14, zIndex: 30,
-            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+            width: '36%', height: 24,
+            background: '#000', borderRadius: 12, zIndex: 30,
           }}>
-            {/* Camera dot */}
             <div style={{
-              position: 'absolute', right: 8, top: '50%',
-              transform: 'translateY(-50%)',
-              width: 7, height: 7, borderRadius: '50%',
-              background: '#1a1a1a',
-              boxShadow: '0 0 0 1px rgba(255,255,255,0.05)',
+              position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)',
+              width: 7, height: 7, borderRadius: '50%', background: '#1c1c1c',
             }} />
           </div>
 
-          {/* Side buttons left */}
-          <div style={{ position: 'absolute', left: -10, top: 72, width: 3, height: 28, background: '#b8b8b8', borderRadius: 2 }} />
-          <div style={{ position: 'absolute', left: -10, top: 110, width: 3, height: 44, background: '#b8b8b8', borderRadius: 2 }} />
-          <div style={{ position: 'absolute', left: -10, top: 162, width: 3, height: 44, background: '#b8b8b8', borderRadius: 2 }} />
-          {/* Side button right */}
-          <div style={{ position: 'absolute', right: -10, top: 110, width: 3, height: 64, background: '#b8b8b8', borderRadius: 2 }} />
+          {/* Side buttons */}
+          <div style={{ position: 'absolute', left: -9, top: 68, width: 3, height: 26, background: '#b4b4b4', borderRadius: 2 }} />
+          <div style={{ position: 'absolute', left: -9, top: 104, width: 3, height: 42, background: '#b4b4b4', borderRadius: 2 }} />
+          <div style={{ position: 'absolute', left: -9, top: 154, width: 3, height: 42, background: '#b4b4b4', borderRadius: 2 }} />
+          <div style={{ position: 'absolute', right: -9, top: 104, width: 3, height: 60, background: '#b4b4b4', borderRadius: 2 }} />
 
-          {/* Screen inner shadow */}
+          {/* Inner screen shadow */}
           <div style={{
-            position: 'absolute', inset: 0, zIndex: 5,
-            boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)',
-            borderRadius: 34,
+            position: 'absolute', inset: 0, zIndex: 5, borderRadius: 33,
+            boxShadow: 'inset 0 0 24px rgba(0,0,0,0.55)',
             pointerEvents: 'none',
           }} />
 
-          {/* Hero image — replace /hero.jpg in /public with your portrait photo */}
+          {/* Hero image — add /public/hero.jpg to fill phone with a portrait */}
           <div style={{
             position: 'absolute', inset: 0,
             backgroundImage: 'url(/hero.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center top',
-            background: 'url(/hero.jpg) center top / cover no-repeat, linear-gradient(175deg, #2c2520 0%, #1a1a1a 50%, #0d0d0d 100%)',
+            background: 'url(/hero.jpg) center top / cover no-repeat, linear-gradient(175deg, #2c2a24 0%, #1a1a1a 45%, #0d0d0d 100%)',
           }} />
         </div>
       </div>
 
-      {/* ── Black section with text + CTA ── */}
-      <div
+      {/* ── Black section ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.1 }}
         className="flex flex-col flex-1"
         style={{
-          background: 'radial-gradient(ellipse at 50% 0%, #1a1a1a 0%, #000 55%)',
-          paddingTop: 60,   /* clears the phone bleed */
+          background: '#000',
+          paddingTop: 28,
           paddingLeft: 24,
           paddingRight: 24,
-          paddingBottom: 40,
+          paddingBottom: 36,
         }}
       >
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="flex flex-col flex-1"
+        <h1
+          style={{
+            fontSize: 'clamp(44px, 12vw, 58px)',
+            fontWeight: 600,           /* matches the reference — not ultra-bold */
+            color: '#fff',
+            lineHeight: 1.1,
+            letterSpacing: '-0.025em',
+            marginBottom: 14,
+          }}
         >
-          <h1
-            style={{
-              fontSize: 'clamp(42px, 11vw, 56px)',
-              fontWeight: 800,
-              color: '#fff',
-              lineHeight: 1.05,
-              letterSpacing: '-0.02em',
-              textAlign: 'center',
-              marginBottom: 16,
-            }}
-          >
-            Become Top-Tier.
-          </h1>
+          Become Top-Tier.
+        </h1>
 
-          <p
-            style={{
-              fontSize: 17,
-              color: 'rgba(255,255,255,0.7)',
-              textAlign: 'center',
-              lineHeight: 1.55,
-              marginBottom: 36,
-            }}
-          >
-            Get your attraction ratings, routine,<br />
-            products &amp; more to ascend in{' '}
-            <span style={{ color: 'var(--teal)', fontWeight: 600 }}>90 days</span>
-          </p>
+        <p
+          style={{
+            fontSize: 17,
+            color: 'rgba(255,255,255,0.62)',
+            lineHeight: 1.55,
+            marginBottom: 32,
+          }}
+        >
+          Get your attraction ratings, routine,<br />
+          products &amp; more to ascend in{' '}
+          <span style={{ color: 'var(--teal)', fontWeight: 600 }}>90 days</span>
+        </p>
 
-          <div style={{ flex: 1 }} />
+        <div style={{ flex: 1 }} />
 
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={() => router.push('/onboarding')}
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: '20px 24px',
-              background: '#fff',
-              color: '#000',
-              fontSize: 17,
-              fontWeight: 600,
-              border: 'none',
-              borderRadius: 16,
-              cursor: 'pointer',
-              letterSpacing: '-0.01em',
-            }}
-          >
-            Get started
-          </motion.button>
-        </motion.div>
-      </div>
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={() => router.push('/onboarding')}
+          style={{
+            display: 'block', width: '100%',
+            padding: '20px 24px',
+            background: '#fff', color: '#000',
+            fontSize: 17, fontWeight: 500,
+            border: 'none', borderRadius: 16,
+            cursor: 'pointer', letterSpacing: '-0.01em',
+          }}
+        >
+          Get started
+        </motion.button>
+      </motion.div>
     </main>
   )
 }
