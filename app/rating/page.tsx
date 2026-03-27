@@ -6,13 +6,7 @@ import { motion } from 'framer-motion'
 import { getState } from '@/lib/store'
 import type { PhysiqueRating } from '@/lib/types'
 
-interface ScoreRow {
-  label: string
-  key: keyof PhysiqueRating
-  teal?: boolean
-}
-
-const ROWS: ScoreRow[] = [
+const ROWS: { label: string; key: keyof PhysiqueRating; teal?: boolean }[] = [
   { label: 'Attractiveness', key: 'attractiveness', teal: true },
   { label: 'Physique', key: 'physique' },
   { label: 'Body Ratios', key: 'ratios' },
@@ -21,59 +15,17 @@ const ROWS: ScoreRow[] = [
 ]
 
 function ScoreBar({ label, value, teal, delay }: { label: string; value: number; teal?: boolean; delay: number }) {
-  const [width, setWidth] = useState(0)
-  const pct = (value / 10) * 100
-
-  useEffect(() => {
-    const t = setTimeout(() => setWidth(pct), delay)
-    return () => clearTimeout(t)
-  }, [pct, delay])
-
+  const [w, setW] = useState(0)
+  useEffect(() => { const t = setTimeout(() => setW((value / 10) * 100), delay); return () => clearTimeout(t) }, [value, delay])
   return (
-    <div className="flex items-center gap-3 mb-5">
-      <span className="text-white font-semibold text-sm w-32 shrink-0">{label}</span>
-      <div className="flex-1 bar-track">
-        <div
-          className={teal ? 'bar-fill-teal' : 'bar-fill-white'}
-          style={{ width: `${width}%`, transition: 'width 1s cubic-bezier(0.25,0.46,0.45,0.94)' }}
-        />
+    <div className="flex items-center gap-3 mb-4">
+      <span className={`text-sm font-semibold shrink-0 ${teal ? 'teal' : 'text-white'}`} style={{ width: 120 }}>{label}</span>
+      <div className="hbar-track flex-1">
+        <div className={teal ? 'hbar-fill-teal' : 'hbar-fill-white'} style={{ width: `${w}%` }} />
       </div>
-      <span className={`text-sm font-bold w-10 text-right ${teal ? 'teal' : 'text-white'}`}>
+      <span className={`text-sm font-bold shrink-0 text-right ${teal ? 'teal' : 'text-white'}`} style={{ width: 32 }}>
         {value.toFixed(1)}
       </span>
-    </div>
-  )
-}
-
-function CircleScore({ value, percentile }: { value: number; percentile: number }) {
-  const [progress, setProgress] = useState(0)
-  const radius = 52
-  const circ = 2 * Math.PI * radius
-  const dash = (progress / 10) * circ
-
-  useEffect(() => {
-    const t = setTimeout(() => setProgress(value), 300)
-    return () => clearTimeout(t)
-  }, [value])
-
-  return (
-    <div className="relative flex items-center justify-center w-36 h-36">
-      <svg width="144" height="144" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx="72" cy="72" r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
-        <circle
-          cx="72" cy="72" r={radius}
-          fill="none"
-          stroke="var(--teal)"
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeDasharray={`${dash} ${circ}`}
-          style={{ transition: 'stroke-dasharray 1.2s cubic-bezier(0.25,0.46,0.45,0.94)', filter: 'drop-shadow(0 0 6px rgba(92,224,208,0.7))' }}
-        />
-      </svg>
-      <div className="absolute text-center">
-        <div className="text-3xl font-black teal-glow">{progress.toFixed(1)}</div>
-        <div className="text-xs text-[var(--text-muted)] mt-0.5">Top {100 - percentile}%</div>
-      </div>
     </div>
   )
 }
@@ -82,130 +34,103 @@ export default function RatingPage() {
   const router = useRouter()
   const [rating, setRating] = useState<PhysiqueRating | null>(null)
   const [image, setImage] = useState<string | null>(null)
-  const [revealed, setRevealed] = useState(false)
 
   useEffect(() => {
-    const state = getState()
-    if (!state.uploadedImageDataUrl) { router.push('/'); return }
-    setImage(state.uploadedImageDataUrl)
-    setRating(state.rating)
-    const t = setTimeout(() => setRevealed(true), 200)
-    return () => clearTimeout(t)
+    const s = getState()
+    if (!s.uploadedImageDataUrl) { router.push('/'); return }
+    setImage(s.uploadedImageDataUrl)
+    setRating(s.rating)
   }, [router])
 
-  if (!rating || !revealed) {
+  if (!rating) {
     return (
-      <main className="min-h-screen radial-bg flex items-center justify-center">
-        <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1, repeat: Infinity }}>
-          <span style={{ fontSize: 48 }}>⚡</span>
-        </motion.div>
+      <main className="min-h-dvh radial-bg flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-2 border-[var(--teal)] border-t-transparent animate-spin" />
       </main>
     )
   }
 
   return (
-    <main className="min-h-screen radial-bg flex flex-col px-5 pb-10">
+    <main className="min-h-dvh bg-black flex flex-col">
       {/* Header */}
-      <div className="flex items-center pt-6 pb-4">
-        <button onClick={() => router.push('/')} className="text-[var(--text-muted)] text-sm">‹ Start over</button>
-        <h1 className="flex-1 text-center text-base font-black teal">NextBody</h1>
-        <div className="w-20" />
+      <div className="flex items-center px-5 pt-10 pb-4">
+        <button onClick={() => router.push('/onboarding')} className="text-[var(--text-sub)] text-lg">‹</button>
+        <div className="flex-1" />
       </div>
 
-      {/* Title */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center mb-6"
-      >
-        <h2 className="text-2xl font-black text-white">Your Physique Analysis</h2>
-        <p className="text-[var(--text-muted)] text-sm mt-1">Honest. Brutal. Accurate.</p>
-      </motion.div>
+      <div className="flex-1 overflow-y-auto px-5 pb-6">
 
-      {/* Photo + overall score */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1, duration: 0.5 }}
-        className="flex gap-4 items-center mb-6"
-      >
-        {image && (
-          <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-[var(--teal)] shrink-0"
-            style={{ boxShadow: '0 0 20px rgba(92,224,208,0.3)' }}>
-            <img src={image} alt="Your photo" className="w-full h-full object-cover" />
-          </div>
-        )}
-        <div className="flex-1">
-          <CircleScore value={rating.overall} percentile={rating.percentile} />
-        </div>
-      </motion.div>
+        {/* Title */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <h1 className="text-3xl font-black text-white mb-1">Your Physique Score</h1>
+          <p className="text-[var(--text-sub)] text-sm mb-6">Honest. Accurate. Actionable.</p>
+        </motion.div>
 
-      {/* Summary */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="card p-4 mb-6 text-center"
-        style={{ borderColor: 'rgba(92,224,208,0.2)' }}
-      >
-        <p className="text-white font-semibold text-sm leading-relaxed">"{rating.summary}"</p>
-        <p className="text-[var(--text-dim)] text-xs mt-2">Body fat estimate: <span className="teal font-bold">{rating.bodyFatEstimate}</span></p>
-      </motion.div>
-
-      {/* Score bars */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-        className="card p-5 mb-6"
-      >
-        <h3 className="text-white font-bold text-sm mb-5 uppercase tracking-widest opacity-60">Detailed Scores</h3>
-        {ROWS.map((row, i) => (
-          <ScoreBar
-            key={row.key}
-            label={row.label}
-            value={rating[row.key] as number}
-            teal={row.teal}
-            delay={500 + i * 150}
-          />
-        ))}
-      </motion.div>
-
-      {/* Percentile callout */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-        className="card p-4 mb-8 text-center"
-        style={{ background: 'rgba(92,224,208,0.06)', borderColor: 'rgba(92,224,208,0.2)' }}
-      >
-        <p className="text-[var(--text-muted)] text-xs leading-relaxed">
-          You are currently in the <span className="text-white font-bold">top {100 - rating.percentile}%</span> physically.
-          {rating.potential >= 8
-            ? ' Your genetic potential is exceptional — you\'re closer than you think.'
-            : ' With the right plan, you can reach the top 20% in 90 days.'}
-        </p>
-      </motion.div>
-
-      {/* CTA — reveal transformation */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5 }}
-      >
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={() => router.push('/results')}
-          className="btn-primary w-full py-4 pulse-teal"
-          style={{ fontSize: 17 }}
+        {/* Overall score + photo row */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+          className="flex items-center gap-4 mb-5"
         >
-          Reveal My Future Body →
-        </motion.button>
-        <p className="text-center text-[var(--text-dim)] text-xs mt-3">
-          See your 90-day transformation
-        </p>
-      </motion.div>
+          {image && (
+            <div className="shrink-0 rounded-2xl overflow-hidden"
+              style={{ width: 80, height: 80, border: '1.5px solid var(--teal)', boxShadow: '0 0 16px rgba(92,224,208,0.25)' }}>
+              <img src={image} alt="Your photo" className="w-full h-full object-cover" />
+            </div>
+          )}
+          <div className="flex-1 dark-card p-4 flex items-center justify-between">
+            <div>
+              <p className="text-[var(--text-sub)] text-xs mb-1">Overall Score</p>
+              <p className="text-4xl font-black teal">{rating.overall.toFixed(1)}<span className="text-lg text-[var(--text-sub)] font-normal">/10</span></p>
+            </div>
+            <div className="text-right">
+              <p className="text-[var(--text-sub)] text-xs mb-1">Percentile</p>
+              <p className="text-2xl font-black text-white">Top {100 - rating.percentile}%</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Summary */}
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+          className="dark-card px-4 py-3 mb-5"
+          style={{ borderColor: 'rgba(92,224,208,0.2)' }}
+        >
+          <p className="text-white text-sm font-medium leading-relaxed">"{rating.summary}"</p>
+          <p className="text-[var(--text-dim)] text-xs mt-1">Estimated body fat: <span className="teal font-semibold">{rating.bodyFatEstimate}</span></p>
+        </motion.div>
+
+        {/* Score bars */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+          className="dark-card px-5 py-5 mb-5"
+        >
+          <p className="text-[var(--text-sub)] text-xs font-bold uppercase tracking-widest mb-5">Detailed Analysis</p>
+          {ROWS.map((row, i) => (
+            <ScoreBar key={row.key} label={row.label} value={rating[row.key] as number} teal={row.teal} delay={500 + i * 140} />
+          ))}
+        </motion.div>
+
+        {/* Callout */}
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
+          className="rounded-2xl px-4 py-3 mb-6 text-center"
+          style={{ background: 'rgba(92,224,208,0.06)', border: '1px solid rgba(92,224,208,0.18)' }}
+        >
+          <p className="text-[var(--text-sub)] text-xs leading-relaxed">
+            {rating.potential >= 8
+              ? <>Your genetic potential is <span className="text-white font-semibold">exceptional</span>. You&apos;re closer to the top than you think.</>
+              : <>With the right plan, you can reach the <span className="text-white font-semibold">top 20%</span> in 90 days.</>}
+          </p>
+        </motion.div>
+
+        {/* CTA */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.5 }}>
+          <button onClick={() => router.push('/results')} className="btn-white">
+            Reveal My Future Body
+          </button>
+          <p className="text-center text-[var(--text-dim)] text-xs mt-3">See your 90-day transformation</p>
+        </motion.div>
+      </div>
     </main>
   )
 }

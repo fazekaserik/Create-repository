@@ -2,133 +2,144 @@
 
 :root {
   --teal: #5CE0D0;
-  --teal-bright: #7FFFEF;
-  --teal-dim: rgba(92, 224, 208, 0.15);
-  --teal-glow: rgba(92, 224, 208, 0.4);
-  --bg: #000000;
-  --bg-radial: radial-gradient(ellipse at 50% 30%, #1a1a1a 0%, #000 60%);
-  --surface: #141414;
-  --surface-2: #1c1c1c;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-teal: rgba(92, 224, 208, 0.5);
-  --text: #ffffff;
-  --text-muted: rgba(255, 255, 255, 0.5);
-  --text-dim: rgba(255, 255, 255, 0.3);
+  --teal-dim: rgba(92, 224, 208, 0.12);
+  --bg: #000;
+  --surface: #161616;
+  --surface-2: #1f1f1f;
+  --border: rgba(255,255,255,0.09);
+  --text: #fff;
+  --text-sub: rgba(255,255,255,0.55);
+  --text-dim: rgba(255,255,255,0.3);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   background: #000;
   color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
-  min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
 }
 
-/* PSL teal accent */
+/* --- Teal accent --- */
 .teal { color: var(--teal); }
-.teal-glow {
-  color: var(--teal);
-  text-shadow: 0 0 20px rgba(92, 224, 208, 0.7);
+
+/* --- Buttons --- */
+.btn-white {
+  display: block;
+  width: 100%;
+  padding: 18px 24px;
+  background: #fff;
+  color: #000;
+  font-size: 17px;
+  font-weight: 600;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  text-align: center;
+}
+.btn-white:active { opacity: 0.85; }
+.btn-white:disabled {
+  background: rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.4);
+  cursor: default;
 }
 
-/* Cards */
-.card {
+.btn-teal {
+  display: block;
+  width: 100%;
+  padding: 18px 24px;
+  background: var(--teal);
+  color: #000;
+  font-size: 17px;
+  font-weight: 700;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  text-align: center;
+}
+.btn-teal:active { opacity: 0.85; }
+
+/* --- Bottom sheet card (dark elevated panel) --- */
+.bottom-card {
+  background: #111;
+  border-radius: 28px 28px 0 0;
+  padding: 28px 24px 40px;
+}
+
+/* --- Progress bar (quiz steps) --- */
+.progress-bar {
+  display: flex;
+  gap: 5px;
+  padding: 0 24px;
+  margin-bottom: 32px;
+}
+.progress-seg {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.2);
+}
+.progress-seg.active { background: #fff; }
+
+/* --- Horizontal score bars --- */
+.hbar-track {
+  flex: 1;
+  height: 12px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.hbar-fill-teal {
+  height: 100%;
+  background: var(--teal);
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(92,224,208,0.5);
+  transition: width 1s cubic-bezier(.25,.46,.45,.94);
+}
+.hbar-fill-white {
+  height: 100%;
+  background: #fff;
+  border-radius: 6px;
+  transition: width 1s cubic-bezier(.25,.46,.45,.94);
+}
+
+/* --- Bar chart (Dating Reality) --- */
+.chart-bar { border-radius: 4px 4px 0 0; }
+
+/* --- Card (dark rounded) --- */
+.dark-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 18px;
 }
 
-.card-teal {
-  background: var(--surface);
-  border: 1.5px solid var(--teal);
-  border-radius: 20px;
-  box-shadow: 0 0 20px rgba(92, 224, 208, 0.15);
-}
+/* --- Radial bg --- */
+.radial-bg { background: radial-gradient(ellipse at 50% 25%, #1c1c1c 0%, #000 65%); }
 
-/* Primary button — teal pill */
-.btn-primary {
-  background: var(--teal);
-  color: #000;
-  font-weight: 700;
-  font-size: 17px;
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 0 30px rgba(92, 224, 208, 0.4);
-}
-.btn-primary:hover { box-shadow: 0 0 50px rgba(92, 224, 208, 0.7); transform: translateY(-1px); }
-.btn-primary:active { transform: translateY(0); }
-
-/* Secondary button — white pill */
-.btn-secondary {
-  background: #fff;
-  color: #000;
-  font-weight: 700;
-  font-size: 17px;
-  border: none;
-  border-radius: 100px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.btn-secondary:active { opacity: 0.85; }
-
-/* Score bar track */
-.bar-track {
-  background: rgba(255,255,255,0.08);
-  border-radius: 100px;
-  overflow: hidden;
-  height: 10px;
-}
-.bar-fill-teal {
-  background: var(--teal);
-  height: 100%;
-  border-radius: 100px;
-  box-shadow: 0 0 12px rgba(92, 224, 208, 0.6);
-}
-.bar-fill-white {
-  background: #fff;
-  height: 100%;
-  border-radius: 100px;
-}
-
-/* Radial bg */
-.radial-bg {
-  background: radial-gradient(ellipse at 50% 20%, #1e2a28 0%, #000 65%);
-}
-
-/* Blur locked */
-.blur-locked {
-  filter: blur(14px);
-  pointer-events: none;
-  user-select: none;
-}
-
-/* Animations */
+/* --- Animations --- */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 .shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(92,224,208,0.12) 50%, rgba(255,255,255,0.03) 100%);
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(92,224,208,0.1) 50%, rgba(255,255,255,0.03) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.8s infinite;
 }
 
-@keyframes pulse-teal {
-  0%, 100% { box-shadow: 0 0 20px rgba(92,224,208,0.4); }
-  50% { box-shadow: 0 0 50px rgba(92,224,208,0.8); }
+@keyframes scan-ring {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.5); opacity: 0; }
 }
-.pulse-teal { animation: pulse-teal 2s ease-in-out infinite; }
+.scan-ring { animation: scan-ring 1.6s ease-out infinite; }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-.float { animation: float 3s ease-in-out infinite; }
+.blur-locked { filter: blur(14px); pointer-events: none; user-select: none; }
 
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: #000; }
