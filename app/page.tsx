@@ -142,12 +142,13 @@ export default function WelcomePage() {
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1 }}>
           <h1
             style={{
-              fontSize: 42,
-              fontWeight: 700,
+              fontSize: 'clamp(26px, 7.5vw, 32px)',
+              fontWeight: 600,
               color: '#ffffff',
-              lineHeight: 1.08,
-              letterSpacing: '-0.025em',
+              lineHeight: 1.15,
+              letterSpacing: '-0.015em',
               marginBottom: 14,
+              whiteSpace: 'nowrap',
             }}
           >
             Become Top-Tier.
