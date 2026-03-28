@@ -9,8 +9,8 @@ export default function WelcomePage() {
   const [showHero, setShowHero] = useState(false)
 
   useEffect(() => {
-    // Fade in hero image after entry animation completes (1.2s)
-    const t = setTimeout(() => setShowHero(true), 1200)
+    // Hero fades in as the entry animation settles (1.7s)
+    const t = setTimeout(() => setShowHero(true), 1700)
     return () => clearTimeout(t)
   }, [])
 
@@ -66,9 +66,9 @@ export default function WelcomePage() {
             zIndex: 10,
           }}
         >
-          {/* iPhone 17 — 3D entry animation */}
+          {/* iPhone 17 — premium entry animation */}
           <div
-            className="phone-enter"
+            className="phone-reveal"
             style={{
               width: '100%',
               aspectRatio: '9 / 19.5',
@@ -144,14 +144,26 @@ export default function WelcomePage() {
               background: 'linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%)',
             }} />
 
-            {/* Lighting reflection — top-left corner glint */}
+            {/* Static ambient reflection — top-left corner */}
             <div style={{
               position: 'absolute', inset: 0, zIndex: 8,
-              background: 'linear-gradient(120deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 25%, transparent 55%)',
+              background: 'linear-gradient(120deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.02) 28%, transparent 52%)',
               mixBlendMode: 'soft-light',
               pointerEvents: 'none',
               borderRadius: 41,
             }} />
+
+            {/* Glint sweep — fires once after entry, mimics real glass */}
+            <div
+              className="screen-glint"
+              style={{
+                position: 'absolute', inset: 0, zIndex: 9,
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%)',
+                width: '40%',
+                pointerEvents: 'none',
+                opacity: 0,   /* starts hidden; animation controls opacity */
+              }}
+            />
 
             {/* Inner shadow frame */}
             <div style={{

@@ -145,35 +145,53 @@ html, body {
 ::-webkit-scrollbar-track { background: #000; }
 ::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 2px; }
 
-/* ── iPhone 3D entry + float animations ── */
-@keyframes phoneEnter {
-  0% {
-    transform: translateY(60px) rotateY(25deg) rotateX(10deg) scale(0.9);
-    opacity: 0;
-    filter: blur(6px);
-  }
-  60% {
-    transform: translateY(-8px) rotateY(-4deg) rotateX(2deg) scale(1.02);
-    opacity: 1;
-    filter: blur(0px);
-  }
-  100% {
-    transform: translateY(0) rotateY(0deg) rotateX(0deg) scale(1);
-    opacity: 1;
-    filter: blur(0px);
-  }
+/* ── Premium phone animations ── */
+
+/*
+  Entry: phone materialises upward from a soft blur haze.
+  No rotation — clean vertical rise with a gentle overshoot
+  that settles like a physical object coming to rest.
+  Easing: fast decel (iOS-style spring without the bounce noise).
+*/
+@keyframes phoneReveal {
+  0%   { opacity: 0; transform: translateY(48px) scale(0.90); filter: blur(14px); }
+  30%  { opacity: 1; filter: blur(0); }
+  72%  { transform: translateY(-5px) scale(1.010); }
+  88%  { transform: translateY(2px)  scale(0.998); }
+  100% { transform: translateY(0)    scale(1);     opacity: 1; filter: blur(0); }
 }
 
+/*
+  Float: slow harmonic drift — like the device is suspended in
+  zero gravity. 4 px travel keeps it noticeable but never distracting.
+*/
 @keyframes phoneFloat {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-6px); }
+  0%, 100% { transform: translateY(0px);  }
+  50%       { transform: translateY(-4px); }
 }
 
-.phone-enter {
-  animation: phoneEnter 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  transform-style: preserve-3d;
+/*
+  Glint: a single angled highlight sweeps left→right across the
+  screen surface after the entry settles — mimics light catching
+  real glass. Runs once, then fades forever.
+*/
+@keyframes screenGlint {
+  0%   { transform: translateX(-160%) skewX(-18deg); opacity: 0;   }
+  18%  { opacity: 0.55; }
+  82%  { opacity: 0.55; }
+  100% { transform: translateX(280%)  skewX(-18deg); opacity: 0;   }
+}
+
+.phone-reveal {
+  animation: phoneReveal 1.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .phone-float {
-  animation: phoneFloat 4s ease-in-out 1.2s infinite;
+  /* starts after reveal completes; period 5.5 s = slow, premium */
+  animation: phoneFloat 5.5s ease-in-out 1.7s infinite;
+}
+
+.screen-glint {
+  /* fires once, 0.5 s after entry settles */
+  animation: screenGlint 1.1s ease-in-out 2.2s forwards;
 }
