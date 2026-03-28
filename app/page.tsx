@@ -121,18 +121,14 @@ export default function WelcomePage() {
           overflow: 'hidden',
         }}
       >
-        {/* Diffused glow blob — sits behind text, blurred for softness */}
+        {/* Pure white radial glow — Apple style, blurred light not gray */}
         <div
           aria-hidden
           style={{
             position: 'absolute',
-            top: '5%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '160%',
-            height: '70%',
-            background: 'radial-gradient(ellipse at center, rgba(80,80,80,0.55) 0%, rgba(30,30,30,0.3) 40%, transparent 70%)',
-            filter: 'blur(48px)',
+            inset: 0,
+            background: 'radial-gradient(circle at 50% 60%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 25%, rgba(0,0,0,0.0) 60%)',
+            filter: 'blur(80px)',
             pointerEvents: 'none',
             zIndex: 0,
           }}
@@ -142,16 +138,19 @@ export default function WelcomePage() {
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1 }}>
           <h1
             style={{
-              fontSize: 'clamp(26px, 7.5vw, 32px)',
-              fontWeight: 600,
+              fontSize: 'clamp(34px, 6vw, 44px)',
+              fontWeight: 500,
               color: '#ffffff',
-              lineHeight: 1.15,
-              letterSpacing: '-0.015em',
+              lineHeight: 1.05,
+              letterSpacing: '-0.02em',
               marginBottom: 14,
               whiteSpace: 'nowrap',
+              transform: 'translateY(-2px)',
+              maxWidth: '90%',
+              margin: '0 auto 14px',
             }}
           >
-            Become Top-Tier.
+            Become Top-Tier
           </h1>
 
           <p
