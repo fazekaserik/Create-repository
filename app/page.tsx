@@ -121,14 +121,13 @@ export default function WelcomePage() {
           overflow: 'hidden',
         }}
       >
-        {/* Pure white radial glow — Apple style, blurred light not gray */}
+        {/* Radial gray glow — bright enough to see, fades to pure black */}
         <div
           aria-hidden
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'radial-gradient(circle at 50% 60%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 25%, rgba(0,0,0,0.0) 60%)',
-            filter: 'blur(80px)',
+            background: 'radial-gradient(ellipse 120% 65% at 50% 35%, #3a3a3a 0%, #1c1c1c 40%, #000000 70%)',
             pointerEvents: 'none',
             zIndex: 0,
           }}
