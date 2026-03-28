@@ -9,20 +9,25 @@ export default function WelcomePage() {
   return (
     <main className="min-h-dvh flex flex-col overflow-hidden">
 
-      {/* ── White section ── */}
+      {/* ── White section — phone clipped at bottom ── */}
       <div
-        className="relative overflow-visible"
-        style={{ background: '#fff', height: '56vh', flexShrink: 0 }}
+        style={{
+          position: 'relative',
+          background: '#ebebeb',
+          height: '57vh',
+          flexShrink: 0,
+          overflow: 'hidden',   /* clips phone bottom cleanly */
+        }}
       >
         {/* Language selector */}
         <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 20 }}>
           <button
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
-              background: '#fff', border: '1px solid rgba(0,0,0,0.1)',
-              borderRadius: 22, padding: '7px 13px',
-              fontSize: 14, fontWeight: 600, color: '#000',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.13)', cursor: 'pointer',
+              background: '#fff', border: 'none',
+              borderRadius: 24, padding: '8px 15px',
+              fontSize: 15, fontWeight: 500, color: '#000',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.16)', cursor: 'pointer',
             }}
           >
             <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
@@ -39,23 +44,23 @@ export default function WelcomePage() {
           </button>
         </div>
 
-        {/* Phone — anchored from TOP so the top is always visible */}
+        {/* iPhone 17 frame — wide, anchored from top, clipped at bottom */}
         <div
           style={{
             position: 'absolute',
-            top: 16,                  /* small gap from top — keeps top of phone in view */
+            top: 10,
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '62vw',
-            maxWidth: 248,
-            height: '54vh',           /* explicit height, not aspect-ratio derived */
-            borderRadius: 40,
-            border: '7px solid #c2c2c2',
+            width: '75vw',
+            maxWidth: 305,
+            aspectRatio: '9 / 19.5',   /* iPhone 17 proportions */
+            borderRadius: 52,
+            border: '9px solid #c4c4c4',
             boxShadow: [
-              '0 0 0 1px #aaa',
-              '0 0 0 2.5px #d8d8d8',
-              'inset 0 0 0 1px rgba(0,0,0,0.12)',
-              '0 28px 70px rgba(0,0,0,0.18)',
+              '0 0 0 1px #a8a8a8',
+              '0 0 0 2.5px #dedede',
+              'inset 0 0 0 1px rgba(0,0,0,0.1)',
+              '0 24px 64px rgba(0,0,0,0.22)',
               '0 4px 16px rgba(0,0,0,0.1)',
             ].join(', '),
             background: '#0a0a0a',
@@ -65,62 +70,61 @@ export default function WelcomePage() {
         >
           {/* Dynamic island */}
           <div style={{
-            position: 'absolute', top: 10, left: '50%',
+            position: 'absolute', top: 11, left: '50%',
             transform: 'translateX(-50%)',
-            width: '36%', height: 24,
-            background: '#000', borderRadius: 12, zIndex: 30,
+            width: '33%', height: 28,
+            background: '#000', borderRadius: 16, zIndex: 30,
           }}>
             <div style={{
-              position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)',
-              width: 7, height: 7, borderRadius: '50%', background: '#1c1c1c',
+              position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+              width: 8, height: 8, borderRadius: '50%', background: '#1a1a1a',
             }} />
           </div>
 
-          {/* Side buttons */}
-          <div style={{ position: 'absolute', left: -9, top: 68, width: 3, height: 26, background: '#b4b4b4', borderRadius: 2 }} />
-          <div style={{ position: 'absolute', left: -9, top: 104, width: 3, height: 42, background: '#b4b4b4', borderRadius: 2 }} />
-          <div style={{ position: 'absolute', left: -9, top: 154, width: 3, height: 42, background: '#b4b4b4', borderRadius: 2 }} />
-          <div style={{ position: 'absolute', right: -9, top: 104, width: 3, height: 60, background: '#b4b4b4', borderRadius: 2 }} />
+          {/* Left side buttons */}
+          <div style={{ position: 'absolute', left: -11, top: 76, width: 3, height: 30, background: '#aaa', borderRadius: 2 }} />
+          <div style={{ position: 'absolute', left: -11, top: 116, width: 3, height: 48, background: '#aaa', borderRadius: 2 }} />
+          <div style={{ position: 'absolute', left: -11, top: 172, width: 3, height: 48, background: '#aaa', borderRadius: 2 }} />
+          {/* Right side button */}
+          <div style={{ position: 'absolute', right: -11, top: 116, width: 3, height: 70, background: '#aaa', borderRadius: 2 }} />
 
-          {/* Inner screen shadow */}
-          <div style={{
-            position: 'absolute', inset: 0, zIndex: 5, borderRadius: 33,
-            boxShadow: 'inset 0 0 24px rgba(0,0,0,0.55)',
-            pointerEvents: 'none',
-          }} />
-
-          {/* Hero image — add /public/hero.jpg to fill phone with a portrait */}
+          {/* Hero image — place portrait at /public/hero.jpg */}
           <div style={{
             position: 'absolute', inset: 0,
-            backgroundImage: 'url(/hero.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center top',
-            background: 'url(/hero.jpg) center top / cover no-repeat, linear-gradient(175deg, #2c2a24 0%, #1a1a1a 45%, #0d0d0d 100%)',
+            background: 'url(/hero.jpg) center top / cover no-repeat, linear-gradient(180deg, #2a2520 0%, #1a1a1a 50%, #0d0d0d 100%)',
+          }} />
+
+          {/* Inner shadow overlay */}
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 5, borderRadius: 43,
+            boxShadow: 'inset 0 0 22px rgba(0,0,0,0.45)',
+            pointerEvents: 'none',
           }} />
         </div>
       </div>
 
-      {/* ── Black section ── */}
+      {/* ── Black section — centered text, radial glow bg ── */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.1 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
         className="flex flex-col flex-1"
         style={{
-          background: '#000',
-          paddingTop: 28,
+          background: 'radial-gradient(ellipse 90% 55% at 50% 100%, #1f1f1f 0%, #000 55%)',
+          paddingTop: 36,
           paddingLeft: 24,
           paddingRight: 24,
-          paddingBottom: 36,
+          paddingBottom: 40,
+          textAlign: 'center',
         }}
       >
         <h1
           style={{
-            fontSize: 'clamp(44px, 12vw, 58px)',
-            fontWeight: 600,           /* matches the reference — not ultra-bold */
+            fontSize: 'clamp(38px, 11vw, 52px)',
+            fontWeight: 400,
             color: '#fff',
-            lineHeight: 1.1,
-            letterSpacing: '-0.025em',
+            lineHeight: 1.12,
+            letterSpacing: '-0.02em',
             marginBottom: 14,
           }}
         >
@@ -129,15 +133,18 @@ export default function WelcomePage() {
 
         <p
           style={{
-            fontSize: 17,
-            color: 'rgba(255,255,255,0.62)',
-            lineHeight: 1.55,
-            marginBottom: 32,
+            fontSize: 16,
+            color: 'rgba(255,255,255,0.58)',
+            lineHeight: 1.6,
+            marginBottom: 36,
+            maxWidth: 320,
+            marginLeft: 'auto',
+            marginRight: 'auto',
           }}
         >
-          Get your attraction ratings, routine,<br />
+          Get your attraction ratings, routine,{' '}
           products &amp; more to ascend in{' '}
-          <span style={{ color: 'var(--teal)', fontWeight: 600 }}>90 days</span>
+          <span style={{ color: '#5CE0D0' }}>90 days</span>
         </p>
 
         <div style={{ flex: 1 }} />
@@ -150,8 +157,8 @@ export default function WelcomePage() {
             padding: '20px 24px',
             background: '#fff', color: '#000',
             fontSize: 17, fontWeight: 500,
-            border: 'none', borderRadius: 16,
-            cursor: 'pointer', letterSpacing: '-0.01em',
+            border: 'none', borderRadius: 18,
+            cursor: 'pointer',
           }}
         >
           Get started
