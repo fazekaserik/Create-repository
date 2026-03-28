@@ -110,11 +110,8 @@ export default function WelcomePage() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="flex flex-col flex-1"
         style={{
-          /* Layered radial + vertical gradient matching the reference */
-          background: [
-            'radial-gradient(circle at 50% 45%, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.9) 40%, #000 70%)',
-            'linear-gradient(to bottom, #0a0a0a 0%, #000000 100%)',
-          ].join(', '),
+          /* Premium iOS dark radial glow — visible dark-gray center fading to pure black */
+          background: 'radial-gradient(ellipse 110% 55% at 50% 30%, #222222 0%, #111111 35%, #000000 70%)',
           paddingTop: 36,
           paddingLeft: 24,
           paddingRight: 24,
