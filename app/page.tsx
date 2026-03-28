@@ -103,29 +103,34 @@ export default function WelcomePage() {
         </div>
       </div>
 
-      {/* ── Black section — centered text, radial glow bg ── */}
+      {/* ── Black section — premium iOS radial gradient + SF typography ── */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
         className="flex flex-col flex-1"
         style={{
-          background: 'radial-gradient(ellipse 90% 55% at 50% 100%, #1f1f1f 0%, #000 55%)',
+          /* Layered radial + vertical gradient matching the reference */
+          background: [
+            'radial-gradient(circle at 50% 45%, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.9) 40%, #000 70%)',
+            'linear-gradient(to bottom, #0a0a0a 0%, #000000 100%)',
+          ].join(', '),
           paddingTop: 36,
           paddingLeft: 24,
           paddingRight: 24,
           paddingBottom: 40,
           textAlign: 'center',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif',
         }}
       >
         <h1
           style={{
-            fontSize: 'clamp(38px, 11vw, 52px)',
-            fontWeight: 400,
-            color: '#fff',
-            lineHeight: 1.12,
+            fontSize: 40,
+            fontWeight: 600,
+            color: '#ffffff',
+            lineHeight: 1.1,
             letterSpacing: '-0.02em',
-            marginBottom: 14,
+            marginBottom: 12,
           }}
         >
           Become Top-Tier.
@@ -134,17 +139,27 @@ export default function WelcomePage() {
         <p
           style={{
             fontSize: 16,
-            color: 'rgba(255,255,255,0.58)',
-            lineHeight: 1.6,
-            marginBottom: 36,
-            maxWidth: 320,
+            fontWeight: 400,
+            color: 'rgba(255,255,255,0.70)',
+            lineHeight: 1.5,
+            marginBottom: 0,
+            maxWidth: 300,
             marginLeft: 'auto',
             marginRight: 'auto',
           }}
         >
           Get your attraction ratings, routine,{' '}
           products &amp; more to ascend in{' '}
-          <span style={{ color: '#5CE0D0' }}>90 days</span>
+          <span
+            style={{
+              background: 'linear-gradient(90deg, #4FD1C5, #81E6D9)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 500,
+            }}
+          >
+            90 days
+          </span>
         </p>
 
         <div style={{ flex: 1 }} />
@@ -155,10 +170,12 @@ export default function WelcomePage() {
           style={{
             display: 'block', width: '100%',
             padding: '20px 24px',
-            background: '#fff', color: '#000',
-            fontSize: 17, fontWeight: 500,
+            background: '#fff', color: '#000000',
+            fontSize: 18, fontWeight: 500,
             border: 'none', borderRadius: 18,
             cursor: 'pointer',
+            marginTop: 28,
+            fontFamily: 'inherit',
           }}
         >
           Get started
