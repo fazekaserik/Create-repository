@@ -103,80 +103,100 @@ export default function WelcomePage() {
         </div>
       </div>
 
-      {/* ── Black section — premium iOS radial gradient + SF typography ── */}
+      {/* ── Black section ── */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
         className="flex flex-col flex-1"
         style={{
-          /* Premium iOS dark radial glow — visible dark-gray center fading to pure black */
-          background: 'radial-gradient(ellipse 110% 55% at 50% 30%, #222222 0%, #111111 35%, #000000 70%)',
+          position: 'relative',
+          background: '#000',
           paddingTop: 36,
           paddingLeft: 24,
           paddingRight: 24,
           paddingBottom: 40,
           textAlign: 'center',
           fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif',
+          overflow: 'hidden',
         }}
       >
-        <h1
+        {/* Diffused glow blob — sits behind text, blurred for softness */}
+        <div
+          aria-hidden
           style={{
-            fontSize: 40,
-            fontWeight: 600,
-            color: '#ffffff',
-            lineHeight: 1.1,
-            letterSpacing: '-0.02em',
-            marginBottom: 12,
+            position: 'absolute',
+            top: '5%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '160%',
+            height: '70%',
+            background: 'radial-gradient(ellipse at center, rgba(80,80,80,0.55) 0%, rgba(30,30,30,0.3) 40%, transparent 70%)',
+            filter: 'blur(48px)',
+            pointerEvents: 'none',
+            zIndex: 0,
           }}
-        >
-          Become Top-Tier.
-        </h1>
+        />
 
-        <p
-          style={{
-            fontSize: 16,
-            fontWeight: 400,
-            color: 'rgba(255,255,255,0.70)',
-            lineHeight: 1.5,
-            marginBottom: 0,
-            maxWidth: 300,
-            marginLeft: 'auto',
-            marginRight: 'auto',
-          }}
-        >
-          Get your attraction ratings, routine,{' '}
-          products &amp; more to ascend in{' '}
-          <span
+        {/* Content sits above the glow */}
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1 }}>
+          <h1
             style={{
-              background: 'linear-gradient(90deg, #4FD1C5, #81E6D9)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              fontWeight: 500,
+              fontSize: 42,
+              fontWeight: 700,
+              color: '#ffffff',
+              lineHeight: 1.08,
+              letterSpacing: '-0.025em',
+              marginBottom: 14,
             }}
           >
-            90 days
-          </span>
-        </p>
+            Become Top-Tier.
+          </h1>
 
-        <div style={{ flex: 1 }} />
+          <p
+            style={{
+              fontSize: 16,
+              fontWeight: 400,
+              color: 'rgba(255,255,255,0.68)',
+              lineHeight: 1.55,
+              maxWidth: 300,
+              marginLeft: 'auto',
+              marginRight: 'auto',
+            }}
+          >
+            Get your attraction ratings, routine,{' '}
+            products &amp; more to ascend in{' '}
+            <span
+              style={{
+                background: 'linear-gradient(90deg, #4FD1C5, #81E6D9)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontWeight: 500,
+              }}
+            >
+              90 days
+            </span>
+          </p>
 
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={() => router.push('/onboarding')}
-          style={{
-            display: 'block', width: '100%',
-            padding: '20px 24px',
-            background: '#fff', color: '#000000',
-            fontSize: 18, fontWeight: 500,
-            border: 'none', borderRadius: 18,
-            cursor: 'pointer',
-            marginTop: 28,
-            fontFamily: 'inherit',
-          }}
-        >
-          Get started
-        </motion.button>
+          <div style={{ flex: 1 }} />
+
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => router.push('/onboarding')}
+            style={{
+              display: 'block', width: '100%',
+              padding: '20px 24px',
+              background: '#fff', color: '#000',
+              fontSize: 18, fontWeight: 500,
+              border: 'none', borderRadius: 18,
+              cursor: 'pointer',
+              marginTop: 28,
+              fontFamily: 'inherit',
+            }}
+          >
+            Get started
+          </motion.button>
+        </div>
       </motion.div>
     </main>
   )
