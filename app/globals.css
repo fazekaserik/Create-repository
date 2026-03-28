@@ -144,3 +144,36 @@ html, body {
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: #000; }
 ::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 2px; }
+
+/* ── iPhone 3D entry + float animations ── */
+@keyframes phoneEnter {
+  0% {
+    transform: translateY(60px) rotateY(25deg) rotateX(10deg) scale(0.9);
+    opacity: 0;
+    filter: blur(6px);
+  }
+  60% {
+    transform: translateY(-8px) rotateY(-4deg) rotateX(2deg) scale(1.02);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    transform: translateY(0) rotateY(0deg) rotateX(0deg) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+@keyframes phoneFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+.phone-enter {
+  animation: phoneEnter 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-style: preserve-3d;
+}
+
+.phone-float {
+  animation: phoneFloat 4s ease-in-out 1.2s infinite;
+}

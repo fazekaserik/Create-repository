@@ -2,9 +2,17 @@
 
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
 
 export default function WelcomePage() {
   const router = useRouter()
+  const [showHero, setShowHero] = useState(false)
+
+  useEffect(() => {
+    // Fade in hero image after entry animation completes (1.2s)
+    const t = setTimeout(() => setShowHero(true), 1200)
+    return () => clearTimeout(t)
+  }, [])
 
   return (
     <main className="min-h-dvh flex flex-col overflow-hidden">
@@ -16,7 +24,8 @@ export default function WelcomePage() {
           background: '#ebebeb',
           height: '57vh',
           flexShrink: 0,
-          overflow: 'hidden',   /* clips phone bottom cleanly */
+          overflow: 'hidden',
+          perspective: '1200px',   /* 3D perspective for child phone */
         }}
       >
         {/* Language selector */}
@@ -44,8 +53,9 @@ export default function WelcomePage() {
           </button>
         </div>
 
-        {/* iPhone 17 frame — wide, anchored from top, clipped at bottom */}
+        {/* Float wrapper — handles continuous levitation after entry */}
         <div
+          className="phone-float"
           style={{
             position: 'absolute',
             top: 10,
@@ -53,53 +63,104 @@ export default function WelcomePage() {
             transform: 'translateX(-50%)',
             width: '75vw',
             maxWidth: 305,
-            aspectRatio: '9 / 19.5',   /* iPhone 17 proportions */
-            borderRadius: 52,
-            border: '9px solid #c4c4c4',
-            boxShadow: [
-              '0 0 0 1px #a8a8a8',
-              '0 0 0 2.5px #dedede',
-              'inset 0 0 0 1px rgba(0,0,0,0.1)',
-              '0 24px 64px rgba(0,0,0,0.22)',
-              '0 4px 16px rgba(0,0,0,0.1)',
-            ].join(', '),
-            background: '#0a0a0a',
-            overflow: 'hidden',
             zIndex: 10,
           }}
         >
-          {/* Dynamic island */}
-          <div style={{
-            position: 'absolute', top: 11, left: '50%',
-            transform: 'translateX(-50%)',
-            width: '33%', height: 28,
-            background: '#000', borderRadius: 16, zIndex: 30,
-          }}>
+          {/* iPhone 17 — 3D entry animation */}
+          <div
+            className="phone-enter"
+            style={{
+              width: '100%',
+              aspectRatio: '9 / 19.5',
+              borderRadius: 50,
+              border: '9px solid #c8c8c8',
+              background: 'linear-gradient(145deg, #1e1e1e, #000)',
+              boxShadow: [
+                '0 0 0 1px #adadad',
+                '0 0 0 2.5px #e0e0e0',
+                'inset 0 0 0 1px rgba(255,255,255,0.05)',
+                '0 30px 80px rgba(0,0,0,0.8)',
+                '0 8px 24px rgba(0,0,0,0.5)',
+              ].join(', '),
+              overflow: 'hidden',
+              position: 'relative',
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {/* Dynamic Island */}
             <div style={{
-              position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
-              width: 8, height: 8, borderRadius: '50%', background: '#1a1a1a',
+              position: 'absolute', top: 11, left: '50%',
+              transform: 'translateX(-50%)',
+              width: '33%', height: 28,
+              background: '#000', borderRadius: 16, zIndex: 30,
+            }}>
+              {/* Camera dot */}
+              <div style={{
+                position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+                width: 8, height: 8, borderRadius: '50%',
+                background: 'radial-gradient(circle at 35% 35%, #2a2a2a, #0a0a0a)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+              }} />
+            </div>
+
+            {/* Left buttons — metallic */}
+            <div style={{ position: 'absolute', left: -11, top: 76, width: 3.5, height: 30, background: 'linear-gradient(to right, #888, #bbb, #888)', borderRadius: 2 }} />
+            <div style={{ position: 'absolute', left: -11, top: 116, width: 3.5, height: 50, background: 'linear-gradient(to right, #888, #bbb, #888)', borderRadius: 2 }} />
+            <div style={{ position: 'absolute', left: -11, top: 174, width: 3.5, height: 50, background: 'linear-gradient(to right, #888, #bbb, #888)', borderRadius: 2 }} />
+            {/* Right power button */}
+            <div style={{ position: 'absolute', right: -11, top: 116, width: 3.5, height: 72, background: 'linear-gradient(to left, #888, #bbb, #888)', borderRadius: 2 }} />
+
+            {/* Camera bump (top-left corner area) */}
+            <div style={{
+              position: 'absolute', top: 48, left: 12, zIndex: 6,
+              width: 44, height: 44,
+              background: 'radial-gradient(circle, #1a1a1a 60%, transparent 100%)',
+              borderRadius: 14,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.06)',
+            }}>
+              {/* Lens */}
+              <div style={{
+                position: 'absolute', top: '50%', left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 28, height: 28, borderRadius: '50%',
+                background: 'radial-gradient(circle at 35% 35%, #2a3a4a, #080808)',
+                boxShadow: '0 0 0 2px rgba(255,255,255,0.08), inset 0 0 6px rgba(0,0,0,0.8)',
+              }} />
+            </div>
+
+            {/* Hero image — fades in after entry animation */}
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 4,
+              backgroundImage: 'url(/hero.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center top',
+              opacity: showHero ? 1 : 0,
+              transition: 'opacity 0.9s ease',
+            }} />
+
+            {/* Dark fallback visible before hero loads */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%)',
+            }} />
+
+            {/* Lighting reflection — top-left corner glint */}
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 8,
+              background: 'linear-gradient(120deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 25%, transparent 55%)',
+              mixBlendMode: 'soft-light',
+              pointerEvents: 'none',
+              borderRadius: 41,
+            }} />
+
+            {/* Inner shadow frame */}
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 9,
+              boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)',
+              borderRadius: 41,
+              pointerEvents: 'none',
             }} />
           </div>
-
-          {/* Left side buttons */}
-          <div style={{ position: 'absolute', left: -11, top: 76, width: 3, height: 30, background: '#aaa', borderRadius: 2 }} />
-          <div style={{ position: 'absolute', left: -11, top: 116, width: 3, height: 48, background: '#aaa', borderRadius: 2 }} />
-          <div style={{ position: 'absolute', left: -11, top: 172, width: 3, height: 48, background: '#aaa', borderRadius: 2 }} />
-          {/* Right side button */}
-          <div style={{ position: 'absolute', right: -11, top: 116, width: 3, height: 70, background: '#aaa', borderRadius: 2 }} />
-
-          {/* Hero image — place portrait at /public/hero.jpg */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'url(/hero.jpg) center top / cover no-repeat, linear-gradient(180deg, #2a2520 0%, #1a1a1a 50%, #0d0d0d 100%)',
-          }} />
-
-          {/* Inner shadow overlay */}
-          <div style={{
-            position: 'absolute', inset: 0, zIndex: 5, borderRadius: 43,
-            boxShadow: 'inset 0 0 22px rgba(0,0,0,0.45)',
-            pointerEvents: 'none',
-          }} />
         </div>
       </div>
 
@@ -121,7 +182,7 @@ export default function WelcomePage() {
           overflow: 'hidden',
         }}
       >
-        {/* Radial gray glow — bright enough to see, fades to pure black */}
+        {/* Radial gray glow behind text */}
         <div
           aria-hidden
           style={{
@@ -133,7 +194,7 @@ export default function WelcomePage() {
           }}
         />
 
-        {/* Content sits above the glow */}
+        {/* Content above glow */}
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1 }}>
           <h1
             style={{
@@ -142,10 +203,8 @@ export default function WelcomePage() {
               color: '#ffffff',
               lineHeight: 1.05,
               letterSpacing: '-0.02em',
-              marginBottom: 14,
               whiteSpace: 'nowrap',
               transform: 'translateY(-2px)',
-              maxWidth: '90%',
               margin: '0 auto 14px',
             }}
           >
