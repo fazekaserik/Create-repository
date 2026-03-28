@@ -6,26 +6,26 @@ import { motion } from 'framer-motion'
 import { getState } from '@/lib/store'
 import type { PhysiqueRating } from '@/lib/types'
 
-const ROWS: { label: string; key: keyof PhysiqueRating; teal?: boolean }[] = [
-  { label: 'Attractiveness', key: 'attractiveness', teal: true },
-  { label: 'Physique', key: 'physique' },
-  { label: 'Body Ratios', key: 'ratios' },
+const ROWS: { label: string; key: keyof PhysiqueRating }[] = [
+  { label: 'Attractiveness', key: 'attractiveness' },
+  { label: 'Physique',       key: 'physique' },
+  { label: 'Body Ratios',    key: 'ratios' },
   { label: 'Shoulder Width', key: 'shoulderWidth' },
-  { label: 'Potential', key: 'potential', teal: true },
+  { label: 'Potential',      key: 'potential' },
 ]
 
-function ScoreBar({ label, value, teal, delay }: { label: string; value: number; teal?: boolean; delay: number }) {
+function scoreColor(v: number) {
+  if (v > 7) return 'var(--green)'
+  if (v >= 5) return 'var(--teal)'
+  return 'var(--text-sub)'
+}
+
+function ScoreFill({ value, delay }: { value: number; delay: number }) {
   const [w, setW] = useState(0)
   useEffect(() => { const t = setTimeout(() => setW((value / 10) * 100), delay); return () => clearTimeout(t) }, [value, delay])
   return (
-    <div className="flex items-center gap-3 mb-4">
-      <span className={`text-sm font-semibold shrink-0 ${teal ? 'teal' : 'text-white'}`} style={{ width: 120 }}>{label}</span>
-      <div className="hbar-track flex-1">
-        <div className={teal ? 'hbar-fill-teal' : 'hbar-fill-white'} style={{ width: `${w}%` }} />
-      </div>
-      <span className={`text-sm font-bold shrink-0 text-right ${teal ? 'teal' : 'text-white'}`} style={{ width: 32 }}>
-        {value.toFixed(1)}
-      </span>
+    <div className="score-track" style={{ flex: 1 }}>
+      <div className="score-fill" style={{ width: `${w}%` }} />
     </div>
   )
 }
@@ -34,12 +34,15 @@ export default function RatingPage() {
   const router = useRouter()
   const [rating, setRating] = useState<PhysiqueRating | null>(null)
   const [image, setImage] = useState<string | null>(null)
+  const [ringAnimated, setRingAnimated] = useState(false)
 
   useEffect(() => {
     const s = getState()
     if (!s.uploadedImageDataUrl) { router.push('/'); return }
     setImage(s.uploadedImageDataUrl)
     setRating(s.rating)
+    const t = setTimeout(() => setRingAnimated(true), 400)
+    return () => clearTimeout(t)
   }, [router])
 
   if (!rating) {
@@ -50,86 +53,143 @@ export default function RatingPage() {
     )
   }
 
+  const circumference = 283
+  const targetOffset = circumference - (rating.overall / 10) * circumference
+  const percentileLabel = `Top ${100 - rating.percentile}%`
+
+  // Split overall into integer and decimal parts
+  const overallStr = rating.overall.toFixed(1)
+  const [intPart, decPart] = overallStr.split('.')
+
   return (
     <main className="min-h-dvh bg-black flex flex-col">
       {/* Header */}
-      <div className="flex items-center px-5 pt-10 pb-4">
-        <button onClick={() => router.push('/onboarding')} className="text-[var(--text-sub)] text-lg">‹</button>
-        <div className="flex-1" />
+      <div style={{ display: 'flex', alignItems: 'center', padding: '40px 20px 16px' }}>
+        <button
+          onClick={() => router.push('/onboarding')}
+          style={{ fontSize: 24, color: 'var(--text-sub)', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px 0 0' }}
+        >
+          ‹
+        </button>
+        <div style={{ flex: 1 }} />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-6">
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 32px' }}>
 
-        {/* Title */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <h1 className="text-3xl font-black text-white mb-1">Your Physique Score</h1>
-          <p className="text-[var(--text-sub)] text-sm mb-6">Honest. Accurate. Actionable.</p>
-        </motion.div>
-
-        {/* Overall score + photo row */}
+        {/* Score ring + headline */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-          className="flex items-center gap-4 mb-5"
+          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
+          style={{ textAlign: 'center', marginBottom: 28 }}
         >
-          {image && (
-            <div className="shrink-0 rounded-2xl overflow-hidden"
-              style={{ width: 80, height: 80, border: '1.5px solid var(--teal)', boxShadow: '0 0 16px rgba(92,224,208,0.25)' }}>
-              <img src={image} alt="Your photo" className="w-full h-full object-cover" />
+          {/* SVG ring */}
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+            <svg width="120" height="120" viewBox="0 0 100 100">
+              {/* Track */}
+              <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="6" />
+              {/* Fill */}
+              <circle
+                cx="50" cy="50" r="45" fill="none"
+                stroke="url(#scoreGrad)" strokeWidth="6"
+                strokeLinecap="round"
+                strokeDasharray="283"
+                strokeDashoffset={ringAnimated ? targetOffset : circumference}
+                style={{
+                  transform: 'rotate(-90deg)',
+                  transformOrigin: '50% 50%',
+                  transition: 'stroke-dashoffset 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  filter: 'drop-shadow(0 0 6px rgba(92,224,208,0.6))',
+                }}
+              />
+              <defs>
+                <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#5ce0d0" />
+                  <stop offset="100%" stopColor="#4ade80" />
+                </linearGradient>
+              </defs>
+            </svg>
+            {/* Score inside ring */}
+            <div style={{ position: 'absolute', textAlign: 'center' }}>
+              <span style={{ fontSize: 30, fontWeight: 800, color: '#fff', lineHeight: 1 }}>
+                {intPart}
+                <span style={{ color: 'var(--teal)' }}>.{decPart}</span>
+              </span>
+              <div style={{ fontSize: 11, color: 'var(--text-dim)', fontWeight: 500 }}>/10</div>
             </div>
-          )}
-          <div className="flex-1 dark-card p-4 flex items-center justify-between">
-            <div>
-              <p className="text-[var(--text-sub)] text-xs mb-1">Overall Score</p>
-              <p className="text-4xl font-black teal">{rating.overall.toFixed(1)}<span className="text-lg text-[var(--text-sub)] font-normal">/10</span></p>
-            </div>
-            <div className="text-right">
-              <p className="text-[var(--text-sub)] text-xs mb-1">Percentile</p>
-              <p className="text-2xl font-black text-white">Top {100 - rating.percentile}%</p>
-            </div>
+          </div>
+
+          <h1 style={{ fontSize: 26, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Your Physique Score</h1>
+
+          {/* Percentile badge */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+            <span className="teal-badge">{percentileLabel}</span>
           </div>
         </motion.div>
 
-        {/* Summary */}
+        {/* Photo + quote */}
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
-          className="dark-card px-4 py-3 mb-5"
-          style={{ borderColor: 'rgba(92,224,208,0.2)' }}
+          style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 20 }}
         >
-          <p className="text-white text-sm font-medium leading-relaxed">"{rating.summary}"</p>
-          <p className="text-[var(--text-dim)] text-xs mt-1">Estimated body fat: <span className="teal font-semibold">{rating.bodyFatEstimate}</span></p>
+          {image && (
+            <div style={{
+              flexShrink: 0, width: 72, height: 72,
+              borderRadius: 16, overflow: 'hidden',
+              border: '1.5px solid var(--teal)',
+              boxShadow: '0 0 16px rgba(92,224,208,0.2)',
+            }}>
+              <img src={image} alt="Your photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          )}
+          <div className="premium-card" style={{ flex: 1, padding: '14px 16px' }}>
+            <p style={{ fontSize: 13, fontStyle: 'italic', color: 'var(--text-sub)', lineHeight: 1.55, maxWidth: 280 }}>
+              &ldquo;{rating.summary}&rdquo;
+            </p>
+            <p style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 8 }}>
+              Est. body fat: <span style={{ color: 'var(--teal)', fontWeight: 600 }}>{rating.bodyFatEstimate}</span>
+            </p>
+          </div>
         </motion.div>
 
-        {/* Score bars */}
+        {/* Category scores */}
         <motion.div
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          className="dark-card px-5 py-5 mb-5"
+          style={{ marginBottom: 24 }}
         >
-          <p className="text-[var(--text-sub)] text-xs font-bold uppercase tracking-widest mb-5">Detailed Analysis</p>
-          {ROWS.map((row, i) => (
-            <ScoreBar key={row.key} label={row.label} value={rating[row.key] as number} teal={row.teal} delay={500 + i * 140} />
-          ))}
+          <p className="section-label" style={{ marginBottom: 12 }}>Detailed Analysis</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {ROWS.map((row, i) => {
+              const val = rating[row.key] as number
+              return (
+                <div key={row.key} className="premium-card" style={{ padding: '14px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{row.label}</span>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: scoreColor(val) }}>{val.toFixed(1)}</span>
+                  </div>
+                  <ScoreFill value={val} delay={500 + i * 140} />
+                </div>
+              )
+            })}
+          </div>
         </motion.div>
 
-        {/* Callout */}
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
-          className="rounded-2xl px-4 py-3 mb-6 text-center"
-          style={{ background: 'rgba(92,224,208,0.06)', border: '1px solid rgba(92,224,208,0.18)' }}
-        >
-          <p className="text-[var(--text-sub)] text-xs leading-relaxed">
-            {rating.potential >= 8
-              ? <>Your genetic potential is <span className="text-white font-semibold">exceptional</span>. You&apos;re closer to the top than you think.</>
-              : <>With the right plan, you can reach the <span className="text-white font-semibold">top 20%</span> in 90 days.</>}
-          </p>
-        </motion.div>
-
-        {/* CTA */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.5 }}>
+        {/* 90-day plan CTA */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2 }}>
+          <p className="section-label" style={{ textAlign: 'center', marginBottom: 12 }}>Your 90-Day Plan</p>
+          <div className="premium-card" style={{ textAlign: 'center', padding: '16px', marginBottom: 20 }}>
+            <p style={{ fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.55 }}>
+              {rating.potential >= 8
+                ? <>Your genetic potential is <span style={{ color: '#fff', fontWeight: 600 }}>exceptional</span>. You&apos;re closer to the top than you think.</>
+                : <>With the right plan, you can reach the <span style={{ color: '#fff', fontWeight: 600 }}>top 20%</span> in 90 days.</>}
+            </p>
+          </div>
           <button onClick={() => router.push('/results')} className="btn-white">
             Reveal My Future Body
           </button>
-          <p className="text-center text-[var(--text-dim)] text-xs mt-3">See your 90-day transformation</p>
+          <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)', marginTop: 12 }}>
+            See your 90-day transformation
+          </p>
         </motion.div>
+
       </div>
     </main>
   )

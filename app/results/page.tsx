@@ -11,7 +11,7 @@ import BeforeAfterSlider from '@/components/BeforeAfterSlider'
 import ShareButton from '@/components/ShareButton'
 
 const PERIODS: { value: TransformPeriod; label: string }[] = [
-  { value: '1month', label: '1 Month' },
+  { value: '1month',  label: '1 Month'  },
   { value: '3months', label: '3 Months' },
   { value: '6months', label: '6 Months' },
 ]
@@ -53,31 +53,53 @@ export default function ResultsPage() {
 
   return (
     <main className="min-h-dvh bg-black flex flex-col">
-      <div className="flex items-center px-5 pt-10 pb-3">
-        <button onClick={() => router.push('/rating')} className="text-[var(--text-sub)] text-lg">‹</button>
-        <h1 className="flex-1 text-center text-sm font-bold teal tracking-wider">NEXTBODY</h1>
-        <div style={{ width: 24 }} />
+
+      {/* Header */}
+      <div style={{
+        display: 'flex', alignItems: 'center',
+        padding: '44px 20px 12px',
+      }}>
+        <button
+          onClick={() => router.push('/rating')}
+          style={{ fontSize: 24, color: 'var(--text-sub)', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px 0 0', lineHeight: 1 }}
+        >
+          ‹
+        </button>
+        <h1 style={{ flex: 1, textAlign: 'center', fontSize: 18, fontWeight: 600, color: '#fff' }}>
+          Your Transformation
+        </h1>
+        <div style={{ width: 32 }}>
+          {appState.tier !== 'free' && (
+            <ShareButton beforeUrl={appState.uploadedImageDataUrl || ''} afterUrl={currentImage || ''} />
+          )}
+        </div>
       </div>
 
       <AnimatePresence>
         {!revealed ? (
-          <motion.div key="wait" exit={{ opacity: 0 }} className="flex-1 flex items-center justify-center">
+          <motion.div key="wait" exit={{ opacity: 0 }} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div className="w-8 h-8 rounded-full border-2 border-[var(--teal)] border-t-transparent animate-spin" />
           </motion.div>
         ) : (
-          <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col flex-1 pb-8">
+          <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', flex: 1, paddingBottom: 48 }}>
 
-            {/* Headline */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="px-5 mb-3">
-              <h2 className="text-2xl font-black text-white">
+            {/* Headline + stats */}
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} style={{ padding: '0 20px 12px' }}>
+              <h2 style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 8 }}>
                 {activePeriod === '1month' && 'Your first month result'}
-                {activePeriod === '3months' && <>This could be you in <span className="teal">90 days</span></>}
-                {activePeriod === '6months' && <>Your <span className="teal">6-month</span> potential</>}
+                {activePeriod === '3months' && <>This could be you in <span style={{ color: 'var(--teal)' }}>90 days</span></>}
+                {activePeriod === '6months' && <>Your <span style={{ color: 'var(--teal)' }}>6-month</span> potential</>}
               </h2>
               {stats && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="flex gap-2 mt-2">
-                  <span className="text-xs px-3 py-1 rounded-full teal font-semibold" style={{ background: 'rgba(92,224,208,0.1)' }}>{stats.muscle}</span>
-                  <span className="text-xs px-3 py-1 rounded-full text-white font-semibold" style={{ background: 'rgba(255,255,255,0.07)' }}>{stats.fat}</span>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} style={{ display: 'flex', gap: 8 }}>
+                  <span className="teal-badge">{stats.muscle}</span>
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    background: 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: 20, padding: '4px 12px',
+                    fontSize: 12, fontWeight: 600, color: 'var(--text-sub)',
+                  }}>{stats.fat}</span>
                 </motion.div>
               )}
             </motion.div>
@@ -85,8 +107,7 @@ export default function ResultsPage() {
             {/* Before/After slider */}
             <motion.div
               initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}
-              className="relative mx-5 rounded-3xl overflow-hidden"
-              style={{ aspectRatio: '3/4' }}
+              style={{ position: 'relative', margin: '0 20px', borderRadius: 24, overflow: 'hidden', aspectRatio: '3/4' }}
             >
               {appState.uploadedImageDataUrl && currentImage ? (
                 <BeforeAfterSlider beforeUrl={appState.uploadedImageDataUrl} afterUrl={currentImage} isLocked={isLocked} />
@@ -94,63 +115,94 @@ export default function ResultsPage() {
                 <div className="w-full h-full shimmer rounded-3xl" />
               )}
               {isLocked && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="absolute inset-0 flex flex-col items-center justify-center z-10"
-                  style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+                <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  style={{
+                    position: 'absolute', inset: 0, zIndex: 10,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(0,0,0,0.55)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                    padding: '0 32px',
+                  }}
                 >
-                  <p className="text-white font-bold text-lg mb-1">Unlock full transformation</p>
-                  <p className="text-[var(--text-sub)] text-sm mb-5 text-center px-8">
-                    See your {activePeriod === '3months' ? '3-month' : '6-month'} result
+                  <div style={{ fontSize: 32, marginBottom: 16 }}>🔒</div>
+                  <p style={{ fontSize: 22, fontWeight: 700, color: '#fff', textAlign: 'center', marginBottom: 8 }}>
+                    Unlock Results
                   </p>
-                  <button onClick={() => setShowPaywall(true)} className="btn-teal" style={{ width: 'auto', padding: '14px 32px' }}>
-                    Unlock Now
+                  <p style={{ fontSize: 14, color: 'var(--text-sub)', textAlign: 'center', marginBottom: 24, lineHeight: 1.5 }}>
+                    See your {activePeriod === '3months' ? '3-month' : '6-month'} transformation
+                  </p>
+                  <button onClick={() => setShowPaywall(true)} className="btn-white" style={{ width: 'auto', padding: '14px 40px', borderRadius: 14 }}>
+                    Get Full Access
                   </button>
                 </motion.div>
               )}
             </motion.div>
 
-            {/* Period tabs */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="flex gap-2 mx-5 mt-4">
+            {/* Period tabs — pill container */}
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
+              style={{ margin: '16px 20px 0', padding: 4, background: '#141414', borderRadius: 50, display: 'flex', gap: 0 }}
+            >
               {PERIODS.map((p) => {
                 const locked = p.value !== '1month' && appState.tier === 'free'
                 const active = activePeriod === p.value
                 return (
-                  <button key={p.value} onClick={() => handlePeriod(p.value)}
-                    className="flex-1 py-3 rounded-2xl text-sm font-semibold relative transition-all duration-150"
+                  <button
+                    key={p.value}
+                    onClick={() => handlePeriod(p.value)}
                     style={{
-                      background: active ? 'var(--teal)' : 'rgba(255,255,255,0.06)',
-                      color: active ? '#000' : 'rgba(255,255,255,0.5)',
+                      flex: 1, padding: '11px 0',
+                      borderRadius: 46,
+                      fontSize: 14, fontWeight: 600,
+                      background: active ? '#fff' : 'transparent',
+                      color: active ? '#000' : 'rgba(255,255,255,0.45)',
+                      border: 'none', cursor: 'pointer',
+                      transition: 'background 0.2s, color 0.2s',
+                      position: 'relative',
                     }}
                   >
-                    {locked && <span className="text-xs mr-1 opacity-60">&#128274;</span>}
+                    {locked && <span style={{ fontSize: 11, marginRight: 4, opacity: 0.6 }}>&#128274;</span>}
                     {p.label}
                     {p.value === '3months' && !locked && (
-                      <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] px-2 py-0.5 rounded-full font-black"
-                        style={{ background: 'var(--teal)', color: '#000', whiteSpace: 'nowrap' }}>BEST</span>
+                      <span style={{
+                        position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)',
+                        fontSize: 9, padding: '2px 6px', borderRadius: 20, fontWeight: 800,
+                        background: 'var(--teal)', color: '#000', whiteSpace: 'nowrap',
+                      }}>BEST</span>
                     )}
                   </button>
                 )
               })}
             </motion.div>
 
-            {/* Trigger copy */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
-              className="mx-5 mt-3 px-4 py-3 rounded-2xl text-center"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+            {/* Social proof copy */}
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
+              style={{
+                margin: '12px 20px 0',
+                padding: '12px 16px',
+                borderRadius: 16,
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                textAlign: 'center',
+              }}
             >
-              <p className="text-[var(--text-sub)] text-xs leading-relaxed">
+              <p style={{ fontSize: 12, color: 'var(--text-sub)', lineHeight: 1.6 }}>
                 Most users see visible results in 60–90 days &nbsp;·&nbsp; You&apos;re closer than you think
               </p>
             </motion.div>
 
             {/* CTA */}
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="mx-5 mt-4">
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} style={{ margin: '16px 20px 0' }}>
               {appState.tier === 'free' ? (
                 <button onClick={() => setShowPaywall(true)} className="btn-teal">Unlock Full Transformation</button>
               ) : (
                 <ShareButton beforeUrl={appState.uploadedImageDataUrl || ''} afterUrl={currentImage || ''} />
               )}
             </motion.div>
+
           </motion.div>
         )}
       </AnimatePresence>
