@@ -46,6 +46,59 @@ export default function WorkoutPlanPage() {
     const s = appState.current
     let planData: WorkoutPlan | null = null
 
+    const fallback: WorkoutPlan = {
+      daysPerWeek: 5,
+      splitType: 'Push / Pull / Legs',
+      schedule: [
+        { day: 'Monday', focus: 'Push — Chest / Shoulders / Triceps', exercises: [
+          { name: 'Bench Press',           sets: 4, reps: '8-10',  rest: '90s', muscle: 'Chest' },
+          { name: 'Overhead Press',        sets: 3, reps: '10-12', rest: '75s', muscle: 'Shoulders' },
+          { name: 'Incline DB Press',      sets: 3, reps: '10-12', rest: '60s', muscle: 'Upper Chest' },
+          { name: 'Lateral Raises',        sets: 3, reps: '15-20', rest: '45s', muscle: 'Lateral Delts' },
+          { name: 'Tricep Pushdowns',      sets: 3, reps: '12-15', rest: '45s', muscle: 'Triceps' },
+        ]},
+        { day: 'Tuesday', focus: 'Pull — Back / Biceps', exercises: [
+          { name: 'Pull-Ups',              sets: 4, reps: '6-10',  rest: '90s', muscle: 'Back' },
+          { name: 'Barbell Row',           sets: 4, reps: '8-10',  rest: '90s', muscle: 'Back' },
+          { name: 'Cable Row',             sets: 3, reps: '12-15', rest: '60s', muscle: 'Back' },
+          { name: 'Face Pulls',            sets: 3, reps: '15-20', rest: '45s', muscle: 'Rear Delts' },
+          { name: 'Barbell Curl',          sets: 3, reps: '10-12', rest: '60s', muscle: 'Biceps' },
+        ]},
+        { day: 'Wednesday', focus: 'Legs — Quads / Hamstrings / Glutes', exercises: [
+          { name: 'Squat',                 sets: 4, reps: '8-10',  rest: '120s', muscle: 'Quads' },
+          { name: 'Romanian Deadlift',     sets: 3, reps: '10-12', rest: '90s',  muscle: 'Hamstrings' },
+          { name: 'Leg Press',             sets: 3, reps: '12-15', rest: '75s',  muscle: 'Quads' },
+          { name: 'Leg Curl',              sets: 3, reps: '12-15', rest: '60s',  muscle: 'Hamstrings' },
+          { name: 'Calf Raises',           sets: 4, reps: '15-20', rest: '45s',  muscle: 'Calves' },
+        ]},
+        { day: 'Friday', focus: 'Push — Chest / Shoulders / Triceps', exercises: [
+          { name: 'Incline Bench Press',   sets: 4, reps: '8-10',  rest: '90s', muscle: 'Upper Chest' },
+          { name: 'DB Shoulder Press',     sets: 3, reps: '10-12', rest: '75s', muscle: 'Shoulders' },
+          { name: 'Cable Flyes',           sets: 3, reps: '12-15', rest: '60s', muscle: 'Chest' },
+          { name: 'Arnold Press',          sets: 3, reps: '10-12', rest: '60s', muscle: 'Shoulders' },
+          { name: 'Skull Crushers',        sets: 3, reps: '10-12', rest: '60s', muscle: 'Triceps' },
+        ]},
+        { day: 'Saturday', focus: 'Pull + Legs — Back / Biceps / Glutes', exercises: [
+          { name: 'Deadlift',              sets: 4, reps: '5-8',   rest: '120s', muscle: 'Back' },
+          { name: 'Lat Pulldown',          sets: 3, reps: '10-12', rest: '75s',  muscle: 'Lats' },
+          { name: 'Lunges',                sets: 3, reps: '12/leg', rest: '60s', muscle: 'Glutes' },
+          { name: 'Hammer Curls',          sets: 3, reps: '12-15', rest: '45s',  muscle: 'Biceps' },
+        ]},
+      ],
+      restDays: ['Thursday', 'Sunday'],
+      restDayTips: [
+        'Light walking 20-30 min to stay active',
+        'Foam rolling & dynamic stretching for recovery',
+        'Stay hydrated — aim for 3L of water',
+      ],
+      progressionNotes: 'Add 2.5 kg to compound lifts each week. If you fail to complete all reps, hold the weight until you can before increasing.',
+      tips: [
+        'Warm up with 5-10 min light cardio before every session',
+        'Track your lifts — progressive overload is the key to growth',
+        'Sleep 7-9 hours — 80% of muscle growth happens during sleep',
+      ],
+    }
+
     const apiPromise = fetch('/api/generate-plan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -62,8 +115,8 @@ export default function WorkoutPlanPage() {
       }),
     })
       .then(r => r.json())
-      .then(data => { planData = data.plan })
-      .catch(() => { planData = null })
+      .then(data => { planData = data.plan ?? fallback })
+      .catch(() => { planData = fallback })
 
     const start = Date.now()
     const iv = setInterval(() => {

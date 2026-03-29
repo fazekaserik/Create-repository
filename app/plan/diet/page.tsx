@@ -70,6 +70,30 @@ export default function DietPlanPage() {
     let planData: DietPlan | null = null
 
     // Fetch plan
+    const fallback: DietPlan = {
+      calories: 2200, protein: 180, carbs: 240, fat: 65,
+      meals: [
+        { name: 'Breakfast', emoji: '🌅', calories: 500, items: ['Oats with berries', 'Greek yogurt', 'Black coffee'], time: '7:00 AM' },
+        { name: 'Lunch',     emoji: '☀️', calories: 700, items: ['Grilled chicken breast', 'Brown rice', 'Side salad'], time: '12:30 PM' },
+        { name: 'Dinner',    emoji: '🌙', calories: 650, items: ['Salmon fillet', 'Sweet potato', 'Broccoli'], time: '7:00 PM' },
+        { name: 'Snack',     emoji: '⚡', calories: 350, items: ['Protein shake', 'Banana', 'Almonds'], time: '3:30 PM' },
+      ],
+      weeklyPlan: [
+        { day: 'Monday',    meals: ['Oats & eggs', 'Chicken & rice', 'Beef & veggies'] },
+        { day: 'Tuesday',   meals: ['Smoothie bowl', 'Tuna wrap', 'Pasta & chicken'] },
+        { day: 'Wednesday', meals: ['Eggs & toast', 'Salmon salad', 'Steak & potato'] },
+        { day: 'Thursday',  meals: ['Oats & berries', 'Turkey sandwich', 'Shrimp & rice'] },
+        { day: 'Friday',    meals: ['Protein pancakes', 'Chicken wrap', 'Lean burgers'] },
+        { day: 'Saturday',  meals: ['Full breakfast', 'Pasta bolognese', 'Grilled fish'] },
+        { day: 'Sunday',    meals: ['Smoothie', 'Meal prep salad', 'Roast chicken'] },
+      ],
+      tips: [
+        'Drink at least 3L of water daily — especially around workouts',
+        'Eat your largest meal within 2 hours post-workout for muscle recovery',
+        'Prep meals on Sunday to stay consistent throughout the week',
+      ],
+    }
+
     const apiPromise = fetch('/api/generate-plan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -87,8 +111,8 @@ export default function DietPlanPage() {
       }),
     })
       .then(r => r.json())
-      .then(data => { planData = data.plan })
-      .catch(() => { planData = null })
+      .then(data => { planData = data.plan ?? fallback })
+      .catch(() => { planData = fallback })
 
     // Progress animation — fill to 98% over 2.5s
     const start = Date.now()
