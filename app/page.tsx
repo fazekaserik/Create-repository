@@ -118,11 +118,11 @@ export default function WelcomePage() {
               height: 'min(52dvh, 430px)',
               aspectRatio: '9 / 19.5',
               borderRadius: 50,
-              border: '9px solid #c6c6c6',
+              border: '8px solid #1a1a1a',
               position: 'relative',
               overflow: 'hidden',
-              background: '#0a0a0a',
-              boxShadow: '0 0 0 1px #ababab, 0 0 0 2.5px #e0e0e0',
+              background: '#000',
+              boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.06), 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)',
             }}
           >
             {/* Dynamic Island */}
@@ -130,14 +130,14 @@ export default function WelcomePage() {
               position: 'absolute', top: 11, left: '50%',
               transform: 'translateX(-50%)',
               width: '33%', height: 26,
-              background: '#000', borderRadius: 14, zIndex: 20,
+              background: '#111', borderRadius: 14, zIndex: 20,
             }} />
 
             {/* Side buttons */}
-            <div style={{ position:'absolute', left:-11, top:70,  width:3.5, height:28, background:'linear-gradient(90deg,#999,#ccc,#999)', borderRadius:2 }} />
-            <div style={{ position:'absolute', left:-11, top:108, width:3.5, height:46, background:'linear-gradient(90deg,#999,#ccc,#999)', borderRadius:2 }} />
-            <div style={{ position:'absolute', left:-11, top:162, width:3.5, height:46, background:'linear-gradient(90deg,#999,#ccc,#999)', borderRadius:2 }} />
-            <div style={{ position:'absolute', right:-11,top:108, width:3.5, height:66, background:'linear-gradient(90deg,#ccc,#999,#ccc)', borderRadius:2 }} />
+            <div style={{ position:'absolute', left:-9, top:70,  width:3, height:28, background:'#2a2a2a', borderRadius:2 }} />
+            <div style={{ position:'absolute', left:-9, top:108, width:3, height:46, background:'#2a2a2a', borderRadius:2 }} />
+            <div style={{ position:'absolute', left:-9, top:162, width:3, height:46, background:'#2a2a2a', borderRadius:2 }} />
+            <div style={{ position:'absolute', right:-9, top:108, width:3, height:66, background:'#2a2a2a', borderRadius:2 }} />
 
             {/* Hero image */}
             <div style={{
