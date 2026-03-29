@@ -9,9 +9,16 @@ export interface AppState {
   // onboarding
   originalImageUrl: string | null
   uploadedImageDataUrl: string | null
+  name: string | null
+  age: number | null
+  weight: number | null
+  weightUnit: 'kg' | 'lbs'
+  height: number | null
+  heightUnit: 'cm' | 'ft'
   goal: Goal | null
   gymType: GymType | null
   dietType: DietType | null
+  demoMode: boolean
   // classification result
   bodyType: BodyType | null
   sex: 'male' | 'female' | null
@@ -29,9 +36,16 @@ const KEY = 'nextbody_state'
 const defaults: AppState = {
   originalImageUrl: null,
   uploadedImageDataUrl: null,
+  name: null,
+  age: null,
+  weight: null,
+  weightUnit: 'kg',
+  height: null,
+  heightUnit: 'cm',
   goal: null,
   gymType: null,
   dietType: null,
+  demoMode: false,
   bodyType: null,
   sex: null,
   transformations: {},

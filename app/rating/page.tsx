@@ -185,8 +185,30 @@ export default function RatingPage() {
           <button onClick={() => router.push('/results')} className="btn-white">
             Reveal My Future Body
           </button>
-          <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)', marginTop: 12 }}>
-            See your 90-day transformation
+          <button
+            onClick={() => router.push('/plan')}
+            style={{
+              width: '100%',
+              background: 'linear-gradient(135deg, #38bdf8 0%, #5ce0d0 100%)',
+              color: '#000',
+              border: 'none',
+              borderRadius: '16px',
+              padding: '18px 24px',
+              fontSize: '17px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              marginTop: '12px',
+              transition: 'opacity 0.15s, transform 0.15s',
+              letterSpacing: '-0.01em',
+              fontFamily: 'inherit',
+            }}
+            onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.98)')}
+            onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+          >
+            Get Personal Diet / Workout 🥗💪
+          </button>
+          <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.3)', marginTop: '12px' }}>
+            Powered by AI • Built for you
           </p>
         </motion.div>
 
