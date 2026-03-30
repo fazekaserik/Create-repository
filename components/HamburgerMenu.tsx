@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAuth, signOut } from '@/lib/auth'
 
 const NAV_ITEMS = [
   { emoji: '🏠', label: 'Home',          href: '/' },
@@ -16,10 +17,17 @@ export default function HamburgerMenu() {
   const [open, setOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
+  const { user, isLoggedIn } = useAuth()
 
   const navigate = (href: string) => {
     setOpen(false)
     router.push(href)
+  }
+
+  const handleSignOut = () => {
+    setOpen(false)
+    signOut()
+    router.push('/')
   }
 
   return (
@@ -108,30 +116,59 @@ export default function HamburgerMenu() {
               {/* Account section */}
               <div style={{ padding: '24px 20px 0' }}>
                 <p className="section-label" style={{ marginBottom: 12 }}>ACCOUNT</p>
-                <button
-                  onClick={() => {}}
-                  style={{
-                    width: '100%', padding: '12px 20px',
-                    background: '#fff', color: '#000',
-                    fontSize: 15, fontWeight: 600,
-                    border: 'none', borderRadius: 12,
-                    cursor: 'pointer', textAlign: 'center',
-                    fontFamily: 'inherit',
+
+                {isLoggedIn && user ? (
+                  /* Logged-in: avatar row */
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '12px 14px',
+                    background: '#141414',
+                    borderRadius: 12,
+                    border: '1px solid rgba(255,255,255,0.07)',
                     marginBottom: 10,
-                  }}
-                >
-                  Sign In
-                </button>
-                <button
-                  onClick={() => navigate('/onboarding')}
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    color: 'var(--teal)', fontSize: 13, fontWeight: 500,
-                    padding: 0, fontFamily: 'inherit',
-                  }}
-                >
-                  New here? Get started →
-                </button>
+                  }}>
+                    <div style={{
+                      width: 36, height: 36, borderRadius: '50%',
+                      background: 'linear-gradient(135deg, var(--teal), #38bdf8)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 15, fontWeight: 700, color: '#000', flexShrink: 0,
+                    }}>
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</div>
+                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Logged-out: Sign In button */
+                  <>
+                    <button
+                      onClick={() => navigate('/signin')}
+                      style={{
+                        width: '100%', padding: '12px 20px',
+                        background: '#fff', color: '#000',
+                        fontSize: 15, fontWeight: 600,
+                        border: 'none', borderRadius: 12,
+                        cursor: 'pointer', textAlign: 'center',
+                        fontFamily: 'inherit',
+                        marginBottom: 10,
+                      }}
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      onClick={() => navigate('/onboarding')}
+                      style={{
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        color: 'var(--teal)', fontSize: 13, fontWeight: 500,
+                        padding: 0, fontFamily: 'inherit',
+                      }}
+                    >
+                      New here? Get started →
+                    </button>
+                  </>
+                )}
               </div>
 
               {/* Divider */}
@@ -170,6 +207,30 @@ export default function HamburgerMenu() {
                     </button>
                   )
                 })}
+
+                {/* Sign Out — only when logged in */}
+                {isLoggedIn && (
+                  <button
+                    onClick={handleSignOut}
+                    style={{
+                      width: '100%', height: 48,
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '0 12px',
+                      borderRadius: 10,
+                      background: 'none',
+                      border: 'none',
+                      borderLeft: '2px solid transparent',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      marginTop: 4,
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(248,113,113,0.07)' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
+                  >
+                    <span style={{ fontSize: 18, width: 24, textAlign: 'center' }}>🚪</span>
+                    <span style={{ fontSize: 15, fontWeight: 500, color: '#f87171' }}>Sign Out</span>
+                  </button>
+                )}
               </div>
 
               {/* Spacer */}

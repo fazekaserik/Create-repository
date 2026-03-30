@@ -1,8 +1,234 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useAuth, signOut } from '@/lib/auth'
 
-export default function WelcomePage() {
+/* ─── helpers ─────────────────────────────────────────────── */
+function greeting(name: string) {
+  const h = new Date().getHours()
+  const tod = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening'
+  return `Good ${tod}, ${name.split(' ')[0]} 👋`
+}
+
+/* ─── sub-components ──────────────────────────────────────── */
+function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div style={{
+      flex: 1,
+      background: '#141414',
+      borderRadius: 14,
+      padding: '14px 10px',
+      textAlign: 'center',
+      border: '1px solid rgba(255,255,255,0.06)',
+    }}>
+      <div style={{ fontSize: 20, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>{value}</div>
+      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
+      {sub && <div style={{ fontSize: 11, color: 'var(--teal)', marginTop: 3 }}>{sub}</div>}
+    </div>
+  )
+}
+
+function PlanCard({ emoji, title, subtitle, href, router }: { emoji: string; title: string; subtitle: string; href: string; router: ReturnType<typeof useRouter> }) {
+  return (
+    <button
+      onClick={() => router.push(href)}
+      style={{
+        flex: 1,
+        background: '#141414',
+        border: '1px solid rgba(255,255,255,0.06)',
+        borderRadius: 16,
+        padding: '18px 14px',
+        cursor: 'pointer',
+        textAlign: 'left',
+        fontFamily: 'inherit',
+        transition: 'background 0.15s',
+      }}
+      onTouchStart={e => { (e.currentTarget as HTMLButtonElement).style.background = '#1d1d1d' }}
+      onTouchEnd={e => { (e.currentTarget as HTMLButtonElement).style.background = '#141414' }}
+    >
+      <div style={{ fontSize: 26, marginBottom: 8 }}>{emoji}</div>
+      <div style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>{title}</div>
+      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>{subtitle}</div>
+    </button>
+  )
+}
+
+/* ─── Dashboard ───────────────────────────────────────────── */
+function Dashboard({ name, email }: { name: string; email: string }) {
+  const router = useRouter()
+  const [avatarOpen, setAvatarOpen] = useState(false)
+  const initial = name.charAt(0).toUpperCase()
+
+  const quickActions = [
+    { emoji: '📸', label: 'Get my rating', href: '/onboarding' },
+    { emoji: '🥗', label: 'View diet plan', href: '/plan/diet' },
+    { emoji: '💪', label: 'View workout plan', href: '/plan/workout' },
+    { emoji: '📊', label: 'See results', href: '/results' },
+  ]
+
+  return (
+    <main style={{
+      minHeight: '100dvh', background: '#000',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif',
+      paddingBottom: 40,
+    }}>
+      {/* ── Top bar ── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '56px 20px 16px',
+        position: 'relative',
+      }}>
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 8,
+            background: '#000', border: '1px solid rgba(92,224,208,0.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 11, fontWeight: 800, color: 'var(--teal)',
+          }}>NB</div>
+          <span style={{ fontSize: 17, fontWeight: 700, color: '#fff' }}>NextBody</span>
+        </div>
+
+        {/* Avatar */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setAvatarOpen(v => !v)}
+            style={{
+              width: 38, height: 38, borderRadius: '50%',
+              background: 'linear-gradient(135deg, var(--teal), #38bdf8)',
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 15, fontWeight: 700, color: '#000',
+            }}
+          >
+            {initial}
+          </button>
+
+          {/* Dropdown */}
+          {avatarOpen && (
+            <>
+              <div onClick={() => setAvatarOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 50 }} />
+              <div style={{
+                position: 'absolute', right: 0, top: 46, zIndex: 60,
+                background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 14, minWidth: 180, overflow: 'hidden',
+                boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
+              }}>
+                <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{name}</div>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{email}</div>
+                </div>
+                <button
+                  onClick={() => { setAvatarOpen(false); signOut() }}
+                  style={{
+                    width: '100%', padding: '13px 16px',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    fontSize: 14, color: '#f87171', textAlign: 'left',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ── Greeting ── */}
+      <div style={{ padding: '4px 20px 20px' }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em', margin: 0 }}>
+          {greeting(name)}
+        </h1>
+        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+          Ready to level up today?
+        </p>
+      </div>
+
+      {/* ── Stats row ── */}
+      <div style={{ padding: '0 20px 20px', display: 'flex', gap: 10 }}>
+        <StatCard label="Rating" value="—" sub="Not rated yet" />
+        <StatCard label="Streak" value="0" sub="Days" />
+        <StatCard label="Day" value={`${new Date().getDate()}`} />
+      </div>
+
+      {/* ── Today's Focus ── */}
+      <div style={{ padding: '0 20px 20px' }}>
+        <p className="section-label" style={{ marginBottom: 12 }}>TODAY&apos;S FOCUS</p>
+        <div style={{
+          background: 'linear-gradient(135deg, #0d211d 0%, #0a1a2e 100%)',
+          border: '1px solid rgba(92,224,208,0.15)',
+          borderRadius: 18, padding: '20px 18px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+            <div style={{
+              width: 42, height: 42, borderRadius: 12,
+              background: 'rgba(92,224,208,0.12)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 20,
+            }}>🎯</div>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>Start your journey</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>Get your AI body analysis first</div>
+            </div>
+          </div>
+          <button
+            onClick={() => router.push('/onboarding')}
+            className="btn-teal"
+            style={{ padding: '13px 20px', fontSize: 14 }}
+          >
+            Get my rating →
+          </button>
+        </div>
+      </div>
+
+      {/* ── My Plans ── */}
+      <div style={{ padding: '0 20px 20px' }}>
+        <p className="section-label" style={{ marginBottom: 12 }}>MY PLANS</p>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <PlanCard emoji="🥗" title="Diet Plan" subtitle="Personalized nutrition" href="/plan/diet" router={router} />
+          <PlanCard emoji="💪" title="Workout" subtitle="Custom training split" href="/plan/workout" router={router} />
+        </div>
+      </div>
+
+      {/* ── Quick Actions ── */}
+      <div style={{ padding: '0 20px' }}>
+        <p className="section-label" style={{ marginBottom: 12 }}>QUICK ACTIONS</p>
+        <div style={{
+          background: '#141414',
+          border: '1px solid rgba(255,255,255,0.06)',
+          borderRadius: 16, overflow: 'hidden',
+        }}>
+          {quickActions.map((a, i) => (
+            <button
+              key={a.href}
+              onClick={() => router.push(a.href)}
+              style={{
+                width: '100%', height: 52,
+                display: 'flex', alignItems: 'center', gap: 14,
+                padding: '0 16px',
+                background: 'none', border: 'none',
+                borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                cursor: 'pointer', fontFamily: 'inherit',
+                transition: 'background 0.15s',
+              }}
+              onTouchStart={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)' }}
+              onTouchEnd={e => { (e.currentTarget as HTMLButtonElement).style.background = 'none' }}
+            >
+              <span style={{ fontSize: 18, width: 24, textAlign: 'center' }}>{a.emoji}</span>
+              <span style={{ fontSize: 15, color: '#fff', fontWeight: 500 }}>{a.label}</span>
+              <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.25)', fontSize: 16 }}>›</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </main>
+  )
+}
+
+/* ─── Welcome / Landing ───────────────────────────────────── */
+function WelcomePage() {
   const router = useRouter()
 
   return (
@@ -80,7 +306,7 @@ export default function WelcomePage() {
           zIndex: 2,
         }}
       >
-        {/* Brand splash — fades in then out before phone appears */}
+        {/* Brand splash */}
         <div
           className="brand-splash"
           style={{
@@ -101,10 +327,7 @@ export default function WelcomePage() {
           </p>
         </div>
 
-        {/*
-          Phone wrapper — both animations on same element:
-          reveal (scale+fade) then float (infinite levitation)
-        */}
+        {/* Phone wrapper */}
         <div
           style={{
             position: 'relative',
@@ -175,7 +398,7 @@ export default function WelcomePage() {
         </div>
       </div>
 
-      {/* ── Bottom content — headline + CTA ── */}
+      {/* ── Bottom content — headline + CTAs ── */}
       <div
         style={{
           width: '100%',
@@ -232,7 +455,45 @@ export default function WelcomePage() {
         >
           Get started
         </button>
+
+        {/* Sign In ghost button */}
+        <button
+          style={{
+            animation: 'fadeSlideUp 0.7s cubic-bezier(0.25,0.46,0.45,0.94) 2.1s both',
+            display: 'block', width: '100%',
+            marginTop: 12,
+            padding: '18px 24px',
+            background: 'transparent', color: '#fff',
+            fontSize: 17, fontWeight: 500,
+            border: '1.5px solid rgba(255,255,255,0.7)',
+            borderRadius: 18,
+            cursor: 'pointer',
+            transition: 'transform 0.15s ease',
+            fontFamily: 'inherit',
+          }}
+          onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.97)' }}
+          onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
+          onClick={() => router.push('/signin')}
+        >
+          Sign In
+        </button>
       </div>
     </main>
   )
+}
+
+/* ─── Root page ───────────────────────────────────────────── */
+export default function Page() {
+  const { user, isLoggedIn, mounted } = useAuth()
+
+  // Prevent SSR/hydration flash
+  if (!mounted) {
+    return <main style={{ minHeight: '100dvh', background: '#000' }} />
+  }
+
+  if (isLoggedIn && user) {
+    return <Dashboard name={user.name} email={user.email} />
+  }
+
+  return <WelcomePage />
 }
