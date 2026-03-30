@@ -156,9 +156,7 @@ export default function WorkoutPlanPage() {
           <div className="scan-ring" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid var(--teal)', opacity: 0.5 }} />
           <div className="scan-ring" style={{ position: 'absolute', inset: 14, borderRadius: '50%', border: '2px solid var(--teal)', opacity: 0.35, animationDelay: '0.4s' }} />
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(92,224,208,0.10)', border: '1.5px solid var(--teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
-              💪
-            </div>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(92,224,208,0.10)', border: '1.5px solid var(--teal)' }} />
           </div>
         </div>
 
@@ -195,7 +193,7 @@ export default function WorkoutPlanPage() {
 
         <div style={{ flex: 1, padding: '0 24px 48px', overflowY: 'auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Your Plan is Ready 🎉</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Your Plan is Ready</h1>
             <p style={{ fontSize: 14, color: 'var(--text-sub)' }}>Unlock your personalized workout plan</p>
           </div>
 
@@ -210,7 +208,7 @@ export default function WorkoutPlanPage() {
               position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)',
             }}>
-              <span style={{ fontSize: 22, marginBottom: 6 }}>🔒</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.5)', marginBottom: 6, letterSpacing: '0.08em' }}>LOCKED</span>
               <span style={{ fontSize: 13, color: 'var(--text-sub)', fontWeight: 500 }}>Unlock to see</span>
             </div>
           </div>
@@ -257,7 +255,7 @@ export default function WorkoutPlanPage() {
           </div>
 
           <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)', marginBottom: 16 }}>
-            🔒 Secure checkout · Cancel anytime · Instant access
+            Secure checkout · Cancel anytime · Instant access
           </p>
           <button
             onClick={handleDemo}

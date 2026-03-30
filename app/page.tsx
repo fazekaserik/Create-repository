@@ -8,7 +8,7 @@ import { useAuth, signOut } from '@/lib/auth'
 function greeting(name: string) {
   const h = new Date().getHours()
   const tod = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening'
-  return `Good ${tod}, ${name.split(' ')[0]} 👋`
+  return `Good ${tod}, ${name.split(' ')[0]}`
 }
 
 /* ─── sub-components ──────────────────────────────────────── */
@@ -29,7 +29,7 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
   )
 }
 
-function PlanCard({ emoji, title, subtitle, href, router }: { emoji: string; title: string; subtitle: string; href: string; router: ReturnType<typeof useRouter> }) {
+function PlanCard({ title, subtitle, href, router }: { title: string; subtitle: string; href: string; router: ReturnType<typeof useRouter> }) {
   return (
     <button
       onClick={() => router.push(href)}
@@ -47,7 +47,6 @@ function PlanCard({ emoji, title, subtitle, href, router }: { emoji: string; tit
       onTouchStart={e => { (e.currentTarget as HTMLButtonElement).style.background = '#1d1d1d' }}
       onTouchEnd={e => { (e.currentTarget as HTMLButtonElement).style.background = '#141414' }}
     >
-      <div style={{ fontSize: 26, marginBottom: 8 }}>{emoji}</div>
       <div style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>{title}</div>
       <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>{subtitle}</div>
     </button>
@@ -61,10 +60,10 @@ function Dashboard({ name, email }: { name: string; email: string }) {
   const initial = name.charAt(0).toUpperCase()
 
   const quickActions = [
-    { emoji: '📸', label: 'Get my rating', href: '/onboarding' },
-    { emoji: '🥗', label: 'View diet plan', href: '/plan/diet' },
-    { emoji: '💪', label: 'View workout plan', href: '/plan/workout' },
-    { emoji: '📊', label: 'See results', href: '/results' },
+    { label: 'Get my rating', href: '/onboarding' },
+    { label: 'View diet plan', href: '/plan/diet' },
+    { label: 'View workout plan', href: '/plan/workout' },
+    { label: 'See results', href: '/results' },
   ]
 
   return (
@@ -167,7 +166,7 @@ function Dashboard({ name, email }: { name: string; email: string }) {
               background: 'rgba(92,224,208,0.12)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 20,
-            }}>🎯</div>
+            }} />
             <div>
               <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>Start your journey</div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>Get your AI body analysis first</div>
@@ -187,8 +186,8 @@ function Dashboard({ name, email }: { name: string; email: string }) {
       <div style={{ padding: '0 20px 20px' }}>
         <p className="section-label" style={{ marginBottom: 12 }}>MY PLANS</p>
         <div style={{ display: 'flex', gap: 12 }}>
-          <PlanCard emoji="🥗" title="Diet Plan" subtitle="Personalized nutrition" href="/plan/diet" router={router} />
-          <PlanCard emoji="💪" title="Workout" subtitle="Custom training split" href="/plan/workout" router={router} />
+          <PlanCard title="Diet Plan" subtitle="Personalized nutrition" href="/plan/diet" router={router} />
+          <PlanCard title="Workout" subtitle="Custom training split" href="/plan/workout" router={router} />
         </div>
       </div>
 
@@ -216,7 +215,6 @@ function Dashboard({ name, email }: { name: string; email: string }) {
               onTouchStart={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)' }}
               onTouchEnd={e => { (e.currentTarget as HTMLButtonElement).style.background = 'none' }}
             >
-              <span style={{ fontSize: 18, width: 24, textAlign: 'center' }}>{a.emoji}</span>
               <span style={{ fontSize: 15, color: '#fff', fontWeight: 500 }}>{a.label}</span>
               <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.25)', fontSize: 16 }}>›</span>
             </button>

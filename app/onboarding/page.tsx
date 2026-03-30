@@ -252,7 +252,7 @@ export default function OnboardingPage() {
               </p>
               <div style={{ display: 'flex', gap: 12 }}>
                 <div className="premium-card" style={{ flex: 1, textAlign: 'center' }}>
-                  <div style={{ fontSize: 52, marginBottom: 12 }}>😇</div>
+                  <div style={{ marginBottom: 12 }} />
                   {['intelligent', 'kind', 'rich'].map(t => (
                     <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                       <span style={{ color: 'var(--green)', fontSize: 15, fontWeight: 700 }}>✓</span>
@@ -261,7 +261,7 @@ export default function OnboardingPage() {
                   ))}
                 </div>
                 <div className="premium-card" style={{ flex: 1, textAlign: 'center' }}>
-                  <div style={{ fontSize: 52, marginBottom: 12 }}>😞</div>
+                  <div style={{ marginBottom: 12 }} />
                   {['intelligent', 'kind', 'rich'].map(t => (
                     <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                       <span style={{ color: 'var(--red)', fontSize: 15, fontWeight: 700 }}>✗</span>

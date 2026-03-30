@@ -37,7 +37,7 @@ export default function ShareButton({ beforeUrl, afterUrl }: Props) {
         await navigator.share({
           files: [file],
           title: '90 Day Transformation — NextBody',
-          text: 'Look what NextBody showed me 🔥 nextbody.app',
+          text: 'Look what NextBody showed me — nextbody.app',
         })
         setState('shared')
       } catch {
@@ -66,7 +66,7 @@ export default function ShareButton({ beforeUrl, afterUrl }: Props) {
             onClick={handleGenerate}
             className="w-full py-4 rounded-2xl text-base font-bold border border-[#00ff88] text-[#00ff88] hover:bg-[rgba(0,255,136,0.1)] transition-all duration-200"
           >
-            📤 Share Your Transformation
+            Share Your Transformation
           </motion.button>
         )}
 
@@ -105,7 +105,7 @@ export default function ShareButton({ beforeUrl, afterUrl }: Props) {
               onClick={handleShare}
               className="btn-neon w-full py-4 rounded-2xl text-base font-bold pulse-glow"
             >
-              📲 Share to TikTok / Instagram
+              Share to TikTok / Instagram
             </motion.button>
 
             <p className="text-white/30 text-xs text-center">
@@ -121,7 +121,6 @@ export default function ShareButton({ beforeUrl, afterUrl }: Props) {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center py-4"
           >
-            <div className="text-3xl mb-2">🔥</div>
             <p className="text-[#00ff88] font-bold">Shared! Tag us @NextBody</p>
           </motion.div>
         )}

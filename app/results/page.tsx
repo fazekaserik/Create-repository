@@ -126,7 +126,7 @@ export default function ResultsPage() {
                     padding: '0 32px',
                   }}
                 >
-                  <div style={{ fontSize: 32, marginBottom: 16 }}>🔒</div>
+                  <div style={{ marginBottom: 16 }} />
                   <p style={{ fontSize: 22, fontWeight: 700, color: '#fff', textAlign: 'center', marginBottom: 8 }}>
                     Unlock Results
                   </p>

@@ -6,11 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth, signOut } from '@/lib/auth'
 
 const NAV_ITEMS = [
-  { emoji: '🏠', label: 'Home',          href: '/' },
-  { emoji: '📊', label: 'My Rating',     href: '/rating' },
-  { emoji: '🥗', label: 'Diet Plan',     href: '/plan/diet' },
-  { emoji: '💪', label: 'Workout Plan',  href: '/plan/workout' },
-  { emoji: '⚙️', label: 'Settings',      href: '/settings' },
+  { label: 'Home',          href: '/' },
+  { label: 'My Rating',     href: '/rating' },
+  { label: 'Diet Plan',     href: '/plan/diet' },
+  { label: 'Workout Plan',  href: '/plan/workout' },
+  { label: 'Settings',      href: '/settings' },
 ]
 
 export default function HamburgerMenu() {
@@ -198,9 +198,6 @@ export default function HamburgerMenu() {
                       onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
                     >
-                      <span style={{ fontSize: 18, color: isActive ? 'var(--teal)' : 'var(--text-sub)', width: 24, textAlign: 'center' }}>
-                        {item.emoji}
-                      </span>
                       <span style={{ fontSize: 15, fontWeight: 500, color: isActive ? 'var(--teal)' : '#fff' }}>
                         {item.label}
                       </span>
@@ -227,7 +224,6 @@ export default function HamburgerMenu() {
                     onMouseEnter={e => { e.currentTarget.style.background = 'rgba(248,113,113,0.07)' }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
                   >
-                    <span style={{ fontSize: 18, width: 24, textAlign: 'center' }}>🚪</span>
                     <span style={{ fontSize: 15, fontWeight: 500, color: '#f87171' }}>Sign Out</span>
                   </button>
                 )}

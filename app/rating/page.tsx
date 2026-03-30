@@ -205,7 +205,7 @@ export default function RatingPage() {
             onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.98)')}
             onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           >
-            Get Personal Diet / Workout 🥗💪
+            Get Personal Diet / Workout
           </button>
           <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,0.3)', marginTop: '12px' }}>
             Powered by AI • Built for you

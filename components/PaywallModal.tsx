@@ -88,7 +88,7 @@ export default function PaywallModal({ previewImageUrl, onClose, onSuccess }: Pr
               style={{ filter: 'blur(18px) brightness(0.6)', transform: 'scale(1.15)' }}
             />
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="text-3xl mb-2">🔒</div>
+              <div className="mb-2" />
               <p className="text-white font-bold text-sm">Your transformation is ready</p>
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#111] to-transparent" />

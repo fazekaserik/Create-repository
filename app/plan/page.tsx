@@ -12,17 +12,15 @@ const FEATURES = [
 
 const PLAN_CARDS = [
   {
-    emoji: '🥗',
     title: 'Personal Diet Plan',
     subtitle: 'Daily calorie targets, macro splits, meal timing & weekly meal plans',
-    tags: ['🔥 Calories', '💊 Macros', '🥩 Meals'],
+    tags: ['Calories', 'Macros', 'Meals'],
     href: '/plan/diet',
   },
   {
-    emoji: '💪',
     title: 'Personal Workout Plan',
     subtitle: 'Weekly training splits, exercises, sets/reps, rest days & progression',
-    tags: ['🏋️ Training Split', '📈 Progression', '🧘 Recovery'],
+    tags: ['Training Split', 'Progression', 'Recovery'],
     href: '/plan/workout',
   },
 ]
@@ -68,7 +66,6 @@ export default function PlanPage() {
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--teal)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)' }}
             >
-              <div style={{ fontSize: 48, flexShrink: 0, lineHeight: 1 }}>{card.emoji}</div>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 6 }}>{card.title}</p>
                 <p style={{ fontSize: 14, color: 'var(--text-sub)', lineHeight: 1.5, marginBottom: 12 }}>{card.subtitle}</p>
@@ -107,7 +104,7 @@ export default function PlanPage() {
           transition={{ delay: 0.4 }}
           style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)', marginTop: 24 }}
         >
-          🔒 Secure &nbsp;·&nbsp; ⚡ Instant &nbsp;·&nbsp; 🎯 Personalized
+          Secure &nbsp;·&nbsp; Instant &nbsp;·&nbsp; Personalized
         </motion.p>
       </div>
     </main>
