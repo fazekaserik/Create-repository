@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { getState, setState } from '@/lib/store'
+import type { Goal, GymType } from '@/lib/types'
 
 interface Exercise {
   name: string
@@ -29,17 +30,85 @@ interface WorkoutPlan {
   tips: string[]
 }
 
-type PageView = 'loading' | 'paywall' | 'plan'
+type PageView = 'wizard' | 'loading' | 'paywall' | 'plan'
+
+/* ── Copied exactly from onboarding ── */
+function PillToggle<T extends string>({ options, value, onChange }: { options: { label: string; value: T }[]; value: T; onChange: (v: T) => void }) {
+  return (
+    <div style={{ display: 'flex', gap: 0, padding: 4, background: '#141414', borderRadius: 50, marginBottom: 20 }}>
+      {options.map(opt => (
+        <button
+          key={opt.value}
+          onClick={() => onChange(opt.value)}
+          style={{
+            flex: 1, padding: '10px 0',
+            borderRadius: 46,
+            fontSize: 14, fontWeight: 600,
+            background: value === opt.value ? '#fff' : 'transparent',
+            color: value === opt.value ? '#000' : 'rgba(255,255,255,0.45)',
+            border: 'none', cursor: 'pointer',
+            transition: 'background 0.2s, color 0.2s',
+            fontFamily: 'inherit',
+          }}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function BackBtn({ onBack }: { onBack: () => void }) {
+  return (
+    <button
+      onClick={onBack}
+      style={{ fontSize: 22, color: 'var(--text-sub)', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 16, alignSelf: 'flex-start', lineHeight: 1 }}
+    >‹</button>
+  )
+}
+
+function WizardProgress({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="progress-bar">
+      {Array.from({ length: total }).map((_, i) => (
+        <div key={i} className={`progress-seg ${i <= current ? 'active' : ''}`} />
+      ))}
+    </div>
+  )
+}
+
+const GOALS: { value: Goal; label: string; desc: string }[] = [
+  { value: 'cut',   label: 'Get Lean',     desc: 'Lose fat, keep muscle'    },
+  { value: 'build', label: 'Build Muscle', desc: 'Lean muscle gains'        },
+  { value: 'bulk',  label: 'Get Big',      desc: 'Maximum size & strength'  },
+]
+
+const GYMS: { value: GymType; label: string }[] = [
+  { value: 'gym',  label: 'Gym'  },
+  { value: 'home', label: 'Home' },
+]
+
+/* ── */
 
 export default function WorkoutPlanPage() {
   const router = useRouter()
   const [view, setView] = useState<PageView>('loading')
+  const [wizardStep, setWizardStep] = useState(0)
   const [progress, setProgress] = useState(0)
   const [plan, setPlan] = useState<WorkoutPlan | null>(null)
   const appState = useRef(getState())
   const ran = useRef(false)
 
-  useEffect(() => {
+  /* ── Wizard state ── */
+  const [age, setAge] = useState<number | ''>('')
+  const [weight, setWeight] = useState<number | ''>('')
+  const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs'>('kg')
+  const [height, setHeight] = useState<number | ''>('')
+  const [heightUnit, setHeightUnit] = useState<'cm' | 'ft'>('cm')
+  const [goal, setGoal] = useState<Goal | null>(null)
+  const [gym, setGym] = useState<GymType | null>(null)
+
+  const startFetch = () => {
     if (ran.current) return
     ran.current = true
 
@@ -136,6 +205,16 @@ export default function WorkoutPlanPage() {
     })
 
     return () => clearInterval(iv)
+  }
+
+  useEffect(() => {
+    const s = getState()
+    if (!s.age || !s.weight || !s.height || !s.goal || !s.gymType) {
+      setView('wizard')
+      return
+    }
+    startFetch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleDemo = () => {
@@ -145,6 +224,207 @@ export default function WorkoutPlanPage() {
 
   const handleBuy = (planType: 'weekly' | 'monthly') => {
     window.location.href = `/api/checkout?plan=${planType}`
+  }
+
+  const slide = {
+    initial: { opacity: 0, x: 28 },
+    animate: { opacity: 1, x: 0 },
+    exit:    { opacity: 0, x: -28 },
+    transition: { duration: 0.22 },
+  }
+  const colStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', minHeight: '100dvh', padding: '48px 24px 0' }
+
+  const handleWizardBack = () => {
+    if (wizardStep > 0) setWizardStep(s => s - 1)
+    else router.push('/plan')
+  }
+
+  const handleWizardNext = () => setWizardStep(s => s + 1)
+
+  /* ── Wizard ── */
+  if (view === 'wizard') {
+    return (
+      <main style={{ minHeight: '100dvh', background: '#000', display: 'flex', flexDirection: 'column' }}>
+        <AnimatePresence mode="wait">
+
+          {/* Step 0 — Age */}
+          {wizardStep === 0 && (
+            <motion.div key="age" {...slide} style={colStyle}>
+              <BackBtn onBack={handleWizardBack} />
+              <WizardProgress current={0} total={5} />
+              <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>How old are you?</h1>
+              <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 32 }}>Helps us calculate your exact calorie targets</p>
+              <input
+                type="number"
+                value={age}
+                onChange={e => setAge(e.target.value === '' ? '' : Number(e.target.value))}
+                placeholder="Your age"
+                min={13}
+                max={80}
+                className="premium-input"
+                style={{ marginBottom: 16 }}
+              />
+              <div style={{ flex: 1 }} />
+              <button
+                onClick={handleWizardNext}
+                disabled={age === ''}
+                className="btn-white"
+                style={{ marginBottom: 48 }}
+              >
+                Next
+              </button>
+            </motion.div>
+          )}
+
+          {/* Step 1 — Weight */}
+          {wizardStep === 1 && (
+            <motion.div key="weight" {...slide} style={colStyle}>
+              <BackBtn onBack={handleWizardBack} />
+              <WizardProgress current={1} total={5} />
+              <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>What&apos;s your weight?</h1>
+              <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>Used to calculate your calorie and macro targets</p>
+              <PillToggle
+                options={[{ label: 'KG', value: 'kg' }, { label: 'LBS', value: 'lbs' }]}
+                value={weightUnit}
+                onChange={setWeightUnit}
+              />
+              <input
+                type="number"
+                value={weight}
+                onChange={e => setWeight(e.target.value === '' ? '' : Number(e.target.value))}
+                placeholder={weightUnit === 'kg' ? 'e.g. 75' : 'e.g. 165'}
+                className="premium-input"
+                style={{ marginBottom: 16 }}
+              />
+              <div style={{ flex: 1 }} />
+              <button
+                onClick={handleWizardNext}
+                disabled={weight === ''}
+                className="btn-white"
+                style={{ marginBottom: 48 }}
+              >
+                Next
+              </button>
+            </motion.div>
+          )}
+
+          {/* Step 2 — Height */}
+          {wizardStep === 2 && (
+            <motion.div key="height" {...slide} style={colStyle}>
+              <BackBtn onBack={handleWizardBack} />
+              <WizardProgress current={2} total={5} />
+              <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>What&apos;s your height?</h1>
+              <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>Fine-tunes your BMR and body composition analysis</p>
+              <PillToggle
+                options={[{ label: 'CM', value: 'cm' }, { label: 'FT', value: 'ft' }]}
+                value={heightUnit}
+                onChange={setHeightUnit}
+              />
+              <input
+                type="number"
+                value={height}
+                onChange={e => setHeight(e.target.value === '' ? '' : Number(e.target.value))}
+                placeholder={heightUnit === 'cm' ? 'e.g. 178' : 'e.g. 5.9'}
+                className="premium-input"
+                style={{ marginBottom: 16 }}
+              />
+              <div style={{ flex: 1 }} />
+              <button
+                onClick={handleWizardNext}
+                disabled={height === ''}
+                className="btn-white"
+                style={{ marginBottom: 48 }}
+              >
+                Next
+              </button>
+            </motion.div>
+          )}
+
+          {/* Step 3 — Goal */}
+          {wizardStep === 3 && (
+            <motion.div key="goal" {...slide} style={colStyle}>
+              <BackBtn onBack={handleWizardBack} />
+              <WizardProgress current={3} total={5} />
+              <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>Your fitness goal?</h1>
+              <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>We&apos;ll tailor your transformation preview</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {GOALS.map((g) => (
+                  <motion.button
+                    key={g.value}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => { setGoal(g.value); setTimeout(() => setWizardStep(4), 180) }}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      width: '100%', padding: '16px 20px',
+                      background: goal === g.value ? 'rgba(92,224,208,0.08)' : 'var(--surface-2)',
+                      border: goal === g.value ? '1.5px solid var(--teal)' : '1px solid var(--border)',
+                      borderRadius: 20, textAlign: 'left', cursor: 'pointer',
+                      transition: 'border-color 0.15s, background 0.15s',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 16, fontWeight: 600, color: goal === g.value ? 'var(--teal)' : '#fff', marginBottom: 2 }}>{g.label}</div>
+                      <div style={{ fontSize: 13, color: 'var(--text-sub)' }}>{g.desc}</div>
+                    </div>
+                    <div style={{ fontSize: 18, color: 'var(--text-dim)' }}>›</div>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 4 — Gym */}
+          {wizardStep === 4 && (
+            <motion.div key="gym" {...slide} style={colStyle}>
+              <BackBtn onBack={handleWizardBack} />
+              <WizardProgress current={4} total={5} />
+              <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>Where do you train?</h1>
+              <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>Affects your workout recommendations</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                {GYMS.map((g) => (
+                  <motion.button
+                    key={g.value}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => {
+                      const selectedGym = g.value
+                      const currentGoal = goal!
+                      setGym(selectedGym)
+                      setState({
+                        age: age as number,
+                        weight: weight as number,
+                        weightUnit,
+                        height: height as number,
+                        heightUnit,
+                        goal: currentGoal,
+                        gymType: selectedGym,
+                      })
+                      appState.current = getState()
+                      setTimeout(() => {
+                        setView('loading')
+                        startFetch()
+                      }, 180)
+                    }}
+                    style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      padding: '40px 0',
+                      background: gym === g.value ? 'rgba(92,224,208,0.08)' : 'var(--surface-2)',
+                      border: gym === g.value ? '1.5px solid var(--teal)' : '1px solid var(--border)',
+                      borderRadius: 20, cursor: 'pointer',
+                      fontSize: 16, fontWeight: 600,
+                      color: gym === g.value ? 'var(--teal)' : '#fff',
+                      transition: 'border-color 0.15s, background 0.15s, color 0.15s',
+                    }}
+                  >
+                    {g.label}
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+        </AnimatePresence>
+      </main>
+    )
   }
 
   /* ── Loading ── */

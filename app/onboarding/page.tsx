@@ -4,26 +4,19 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { setState } from '@/lib/store'
-import type { Goal, GymType, DietType } from '@/lib/types'
 
 /* ─────────────────────────────────────────────
-   Step definitions
+   Step definitions  (age / weight / height / goal / gym / diet moved to plan pages)
 ───────────────────────────────────────────── */
 type Step =
   | 'edu_halo'
   | 'edu_dating'
   | 'edu_influence'
   | 'quiz_name'
-  | 'quiz_age'
-  | 'quiz_weight'
-  | 'quiz_height'
-  | 'quiz_goal'
-  | 'quiz_gym'
-  | 'quiz_diet'
   | 'upload'
 
 const EDU_STEPS: Step[] = ['edu_halo', 'edu_dating', 'edu_influence']
-const QUIZ_STEPS: Step[] = ['quiz_name', 'quiz_age', 'quiz_weight', 'quiz_height', 'quiz_goal', 'quiz_gym', 'quiz_diet', 'upload']
+const QUIZ_STEPS: Step[] = ['quiz_name', 'upload']
 const ALL_STEPS: Step[] = [...EDU_STEPS, ...QUIZ_STEPS]
 
 /* ─────────────────────────────────────────────
@@ -103,53 +96,6 @@ function DatingChart() {
 }
 
 /* ─────────────────────────────────────────────
-   Pill toggle (KG/LBS, CM/FT)
-───────────────────────────────────────────── */
-function PillToggle<T extends string>({ options, value, onChange }: { options: { label: string; value: T }[]; value: T; onChange: (v: T) => void }) {
-  return (
-    <div style={{ display: 'flex', gap: 0, padding: 4, background: '#141414', borderRadius: 50, marginBottom: 20 }}>
-      {options.map(opt => (
-        <button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          style={{
-            flex: 1, padding: '10px 0',
-            borderRadius: 46,
-            fontSize: 14, fontWeight: 600,
-            background: value === opt.value ? '#fff' : 'transparent',
-            color: value === opt.value ? '#000' : 'rgba(255,255,255,0.45)',
-            border: 'none', cursor: 'pointer',
-            transition: 'background 0.2s, color 0.2s',
-            fontFamily: 'inherit',
-          }}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-/* ─────────────────────────────────────────────
-   Goal / Gym / Diet options
-───────────────────────────────────────────── */
-const GOALS: { value: Goal; label: string; desc: string }[] = [
-  { value: 'cut',   label: 'Get Lean',     desc: 'Lose fat, keep muscle' },
-  { value: 'build', label: 'Build Muscle', desc: 'Lean muscle gains' },
-  { value: 'bulk',  label: 'Get Big',      desc: 'Maximum size & strength' },
-]
-const GYMS: { value: GymType; label: string }[] = [
-  { value: 'gym',  label: 'Gym'  },
-  { value: 'home', label: 'Home' },
-]
-const DIETS: { value: DietType; label: string }[] = [
-  { value: 'standard',  label: 'Standard'  },
-  { value: 'keto',      label: 'Keto'      },
-  { value: 'vegan',     label: 'Vegan'     },
-  { value: 'carnivore', label: 'Carnivore' },
-]
-
-/* ─────────────────────────────────────────────
    Progress bar (quiz only)
 ───────────────────────────────────────────── */
 function ProgressBar({ step }: { step: Step }) {
@@ -186,13 +132,6 @@ export default function OnboardingPage() {
 
   // Quiz state
   const [name, setName] = useState('')
-  const [age, setAge] = useState<number | ''>('')
-  const [weight, setWeight] = useState<number | ''>('')
-  const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs'>('kg')
-  const [height, setHeight] = useState<number | ''>('')
-  const [heightUnit, setHeightUnit] = useState<'cm' | 'ft'>('cm')
-  const [goal, setGoal] = useState<Goal | null>(null)
-  const [gym, setGym] = useState<GymType | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
 
@@ -342,7 +281,7 @@ export default function OnboardingPage() {
               style={{ marginBottom: 16 }}
             />
             <div style={{ flex: 1 }} />
-            <button onClick={() => { setState({ goal: null }); next() }} className="btn-ghost" style={{ marginBottom: 12 }}>Skip</button>
+            <button onClick={() => next()} className="btn-ghost" style={{ marginBottom: 12 }}>Skip</button>
             <button
               onClick={() => { if (name.trim()) { setState({ name: name.trim() }); next() } }}
               disabled={!name.trim()}
@@ -351,193 +290,6 @@ export default function OnboardingPage() {
             >
               Next
             </button>
-          </motion.div>
-        )}
-
-        {/* ── QUIZ: Age ── */}
-        {step === 'quiz_age' && (
-          <motion.div key="age" {...slide} style={colStyle}>
-            <BackBtn onBack={back} />
-            <ProgressBar step={step} />
-            <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>How old are you?</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 32 }}>Helps us calculate your exact calorie targets</p>
-            <input
-              type="number"
-              value={age}
-              onChange={e => setAge(e.target.value === '' ? '' : Number(e.target.value))}
-              placeholder="Your age"
-              min={13}
-              max={80}
-              className="premium-input"
-              style={{ marginBottom: 16 }}
-            />
-            <div style={{ flex: 1 }} />
-            <button
-              onClick={() => { if (age !== '') { setState({ age: age as number }); next() } }}
-              disabled={age === ''}
-              className="btn-white"
-              style={{ marginBottom: 48 }}
-            >
-              Next
-            </button>
-          </motion.div>
-        )}
-
-        {/* ── QUIZ: Weight ── */}
-        {step === 'quiz_weight' && (
-          <motion.div key="weight" {...slide} style={colStyle}>
-            <BackBtn onBack={back} />
-            <ProgressBar step={step} />
-            <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>What&apos;s your weight?</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>Used to calculate your calorie and macro targets</p>
-            <PillToggle
-              options={[{ label: 'KG', value: 'kg' }, { label: 'LBS', value: 'lbs' }]}
-              value={weightUnit}
-              onChange={setWeightUnit}
-            />
-            <input
-              type="number"
-              value={weight}
-              onChange={e => setWeight(e.target.value === '' ? '' : Number(e.target.value))}
-              placeholder={weightUnit === 'kg' ? 'e.g. 75' : 'e.g. 165'}
-              className="premium-input"
-              style={{ marginBottom: 16 }}
-            />
-            <div style={{ flex: 1 }} />
-            <button
-              onClick={() => { if (weight !== '') { setState({ weight: weight as number, weightUnit }); next() } }}
-              disabled={weight === ''}
-              className="btn-white"
-              style={{ marginBottom: 48 }}
-            >
-              Next
-            </button>
-          </motion.div>
-        )}
-
-        {/* ── QUIZ: Height ── */}
-        {step === 'quiz_height' && (
-          <motion.div key="height" {...slide} style={colStyle}>
-            <BackBtn onBack={back} />
-            <ProgressBar step={step} />
-            <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>What&apos;s your height?</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>Fine-tunes your BMR and body composition analysis</p>
-            <PillToggle
-              options={[{ label: 'CM', value: 'cm' }, { label: 'FT', value: 'ft' }]}
-              value={heightUnit}
-              onChange={setHeightUnit}
-            />
-            <input
-              type="number"
-              value={height}
-              onChange={e => setHeight(e.target.value === '' ? '' : Number(e.target.value))}
-              placeholder={heightUnit === 'cm' ? 'e.g. 178' : 'e.g. 5.9'}
-              className="premium-input"
-              style={{ marginBottom: 16 }}
-            />
-            <div style={{ flex: 1 }} />
-            <button
-              onClick={() => { if (height !== '') { setState({ height: height as number, heightUnit }); next() } }}
-              disabled={height === ''}
-              className="btn-white"
-              style={{ marginBottom: 48 }}
-            >
-              Next
-            </button>
-          </motion.div>
-        )}
-
-        {/* ── QUIZ: Goal ── */}
-        {step === 'quiz_goal' && (
-          <motion.div key="goal" {...slide} style={colStyle}>
-            <BackBtn onBack={back} />
-            <ProgressBar step={step} />
-            <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>Your fitness goal?</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>We&apos;ll tailor your transformation preview</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {GOALS.map((g) => (
-                <motion.button
-                  key={g.value}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => { setGoal(g.value); setState({ goal: g.value }); setTimeout(next, 180) }}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    width: '100%', padding: '16px 20px',
-                    background: goal === g.value ? 'rgba(92,224,208,0.08)' : 'var(--surface-2)',
-                    border: goal === g.value ? '1.5px solid var(--teal)' : '1px solid var(--border)',
-                    borderRadius: 20, textAlign: 'left', cursor: 'pointer',
-                    transition: 'border-color 0.15s, background 0.15s',
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 16, fontWeight: 600, color: goal === g.value ? 'var(--teal)' : '#fff', marginBottom: 2 }}>{g.label}</div>
-                    <div style={{ fontSize: 13, color: 'var(--text-sub)' }}>{g.desc}</div>
-                  </div>
-                  <div style={{ fontSize: 18, color: 'var(--text-dim)' }}>›</div>
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* ── QUIZ: Gym ── */}
-        {step === 'quiz_gym' && (
-          <motion.div key="gym" {...slide} style={colStyle}>
-            <BackBtn onBack={back} />
-            <ProgressBar step={step} />
-            <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>Where do you train?</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>Affects your workout recommendations</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              {GYMS.map((g) => (
-                <motion.button
-                  key={g.value}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => { setGym(g.value); setState({ gymType: g.value }); setTimeout(next, 180) }}
-                  style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    padding: '40px 0',
-                    background: gym === g.value ? 'rgba(92,224,208,0.08)' : 'var(--surface-2)',
-                    border: gym === g.value ? '1.5px solid var(--teal)' : '1px solid var(--border)',
-                    borderRadius: 20, cursor: 'pointer',
-                    fontSize: 16, fontWeight: 600,
-                    color: gym === g.value ? 'var(--teal)' : '#fff',
-                    transition: 'border-color 0.15s, background 0.15s, color 0.15s',
-                  }}
-                >
-                  {g.label}
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* ── QUIZ: Diet ── */}
-        {step === 'quiz_diet' && (
-          <motion.div key="diet" {...slide} style={colStyle}>
-            <BackBtn onBack={back} />
-            <ProgressBar step={step} />
-            <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>Diet preference?</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>Last step before your analysis</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              {DIETS.map((d) => (
-                <motion.button
-                  key={d.value}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => { setState({ dietType: d.value }); setTimeout(next, 180) }}
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    padding: '32px 0',
-                    background: 'var(--surface-2)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 20, cursor: 'pointer',
-                    fontSize: 15, fontWeight: 600, color: '#fff',
-                    transition: 'border-color 0.15s',
-                  }}
-                >
-                  {d.label}
-                </motion.button>
-              ))}
-            </div>
           </motion.div>
         )}
 

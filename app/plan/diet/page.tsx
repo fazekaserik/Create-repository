@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getState, setState } from '@/lib/store'
+import type { Goal, DietType } from '@/lib/types'
 
 interface Meal {
   name: string
@@ -28,7 +29,7 @@ interface DietPlan {
   tips: string[]
 }
 
-type PageView = 'loading' | 'paywall' | 'plan'
+type PageView = 'wizard' | 'loading' | 'paywall' | 'plan'
 
 const WEEKLY_PRICES = { weekly: '$4.99', monthly: '$14.99' }
 
@@ -37,6 +38,66 @@ const MACRO_COLORS = {
   carbs: '#38bdf8',
   fat: 'var(--gold)',
 }
+
+/* ── Copied exactly from onboarding ── */
+function PillToggle<T extends string>({ options, value, onChange }: { options: { label: string; value: T }[]; value: T; onChange: (v: T) => void }) {
+  return (
+    <div style={{ display: 'flex', gap: 0, padding: 4, background: '#141414', borderRadius: 50, marginBottom: 20 }}>
+      {options.map(opt => (
+        <button
+          key={opt.value}
+          onClick={() => onChange(opt.value)}
+          style={{
+            flex: 1, padding: '10px 0',
+            borderRadius: 46,
+            fontSize: 14, fontWeight: 600,
+            background: value === opt.value ? '#fff' : 'transparent',
+            color: value === opt.value ? '#000' : 'rgba(255,255,255,0.45)',
+            border: 'none', cursor: 'pointer',
+            transition: 'background 0.2s, color 0.2s',
+            fontFamily: 'inherit',
+          }}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function BackBtn({ onBack }: { onBack: () => void }) {
+  return (
+    <button
+      onClick={onBack}
+      style={{ fontSize: 22, color: 'var(--text-sub)', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 16, alignSelf: 'flex-start', lineHeight: 1 }}
+    >‹</button>
+  )
+}
+
+function WizardProgress({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="progress-bar">
+      {Array.from({ length: total }).map((_, i) => (
+        <div key={i} className={`progress-seg ${i <= current ? 'active' : ''}`} />
+      ))}
+    </div>
+  )
+}
+
+const GOALS: { value: Goal; label: string; desc: string }[] = [
+  { value: 'cut',   label: 'Get Lean',     desc: 'Lose fat, keep muscle'    },
+  { value: 'build', label: 'Build Muscle', desc: 'Lean muscle gains'        },
+  { value: 'bulk',  label: 'Get Big',      desc: 'Maximum size & strength'  },
+]
+
+const DIETS: { value: DietType; label: string }[] = [
+  { value: 'standard',  label: 'Standard'  },
+  { value: 'keto',      label: 'Keto'      },
+  { value: 'vegan',     label: 'Vegan'     },
+  { value: 'carnivore', label: 'Carnivore' },
+]
+
+/* ── */
 
 function MacroBar({ label, grams, total, color }: { label: string; grams: number; total: number; color: string }) {
   const [w, setW] = useState(0)
@@ -57,19 +118,27 @@ function MacroBar({ label, grams, total, color }: { label: string; grams: number
 export default function DietPlanPage() {
   const router = useRouter()
   const [view, setView] = useState<PageView>('loading')
+  const [wizardStep, setWizardStep] = useState(0)
   const [progress, setProgress] = useState(0)
   const [plan, setPlan] = useState<DietPlan | null>(null)
   const appState = useRef(getState())
   const ran = useRef(false)
 
-  useEffect(() => {
+  /* ── Wizard state ── */
+  const [age, setAge] = useState<number | ''>('')
+  const [weight, setWeight] = useState<number | ''>('')
+  const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs'>('kg')
+  const [height, setHeight] = useState<number | ''>('')
+  const [heightUnit, setHeightUnit] = useState<'cm' | 'ft'>('cm')
+  const [goal, setGoal] = useState<Goal | null>(null)
+
+  const startFetch = () => {
     if (ran.current) return
     ran.current = true
 
     const s = appState.current
     let planData: DietPlan | null = null
 
-    // Fetch plan
     const fallback: DietPlan = {
       calories: 2200, protein: 180, carbs: 240, fat: 65,
       meals: [
@@ -114,13 +183,11 @@ export default function DietPlanPage() {
       .then(data => { planData = data.plan ?? fallback })
       .catch(() => { planData = fallback })
 
-    // Progress animation — fill to 98% over 2.5s
     const start = Date.now()
     const iv = setInterval(() => {
       setProgress(Math.min(((Date.now() - start) / 2500) * 98, 98))
     }, 40)
 
-    // Wait for both
     Promise.all([apiPromise, new Promise(r => setTimeout(r, 2500))]).then(() => {
       clearInterval(iv)
       setProgress(100)
@@ -134,6 +201,16 @@ export default function DietPlanPage() {
     })
 
     return () => clearInterval(iv)
+  }
+
+  useEffect(() => {
+    const s = getState()
+    if (!s.age || !s.weight || !s.height || !s.goal || !s.dietType) {
+      setView('wizard')
+      return
+    }
+    startFetch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleDemo = () => {
@@ -145,18 +222,214 @@ export default function DietPlanPage() {
     window.location.href = `/api/checkout?plan=${planType}`
   }
 
+  const slide = {
+    initial: { opacity: 0, x: 28 },
+    animate: { opacity: 1, x: 0 },
+    exit:    { opacity: 0, x: -28 },
+    transition: { duration: 0.22 },
+  }
+  const colStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', minHeight: '100dvh', padding: '48px 24px 0' }
+
+  const handleWizardBack = () => {
+    if (wizardStep > 0) setWizardStep(s => s - 1)
+    else router.push('/plan')
+  }
+
+  const handleWizardNext = () => setWizardStep(s => s + 1)
+
+  /* ── Wizard ── */
+  if (view === 'wizard') {
+    return (
+      <main style={{ minHeight: '100dvh', background: '#000', display: 'flex', flexDirection: 'column' }}>
+        <AnimatePresence mode="wait">
+
+          {/* Step 0 — Age */}
+          {wizardStep === 0 && (
+            <motion.div key="age" {...slide} style={colStyle}>
+              <BackBtn onBack={handleWizardBack} />
+              <WizardProgress current={0} total={5} />
+              <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>How old are you?</h1>
+              <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 32 }}>Helps us calculate your exact calorie targets</p>
+              <input
+                type="number"
+                value={age}
+                onChange={e => setAge(e.target.value === '' ? '' : Number(e.target.value))}
+                placeholder="Your age"
+                min={13}
+                max={80}
+                className="premium-input"
+                style={{ marginBottom: 16 }}
+              />
+              <div style={{ flex: 1 }} />
+              <button
+                onClick={handleWizardNext}
+                disabled={age === ''}
+                className="btn-white"
+                style={{ marginBottom: 48 }}
+              >
+                Next
+              </button>
+            </motion.div>
+          )}
+
+          {/* Step 1 — Weight */}
+          {wizardStep === 1 && (
+            <motion.div key="weight" {...slide} style={colStyle}>
+              <BackBtn onBack={handleWizardBack} />
+              <WizardProgress current={1} total={5} />
+              <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>What&apos;s your weight?</h1>
+              <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>Used to calculate your calorie and macro targets</p>
+              <PillToggle
+                options={[{ label: 'KG', value: 'kg' }, { label: 'LBS', value: 'lbs' }]}
+                value={weightUnit}
+                onChange={setWeightUnit}
+              />
+              <input
+                type="number"
+                value={weight}
+                onChange={e => setWeight(e.target.value === '' ? '' : Number(e.target.value))}
+                placeholder={weightUnit === 'kg' ? 'e.g. 75' : 'e.g. 165'}
+                className="premium-input"
+                style={{ marginBottom: 16 }}
+              />
+              <div style={{ flex: 1 }} />
+              <button
+                onClick={handleWizardNext}
+                disabled={weight === ''}
+                className="btn-white"
+                style={{ marginBottom: 48 }}
+              >
+                Next
+              </button>
+            </motion.div>
+          )}
+
+          {/* Step 2 — Height */}
+          {wizardStep === 2 && (
+            <motion.div key="height" {...slide} style={colStyle}>
+              <BackBtn onBack={handleWizardBack} />
+              <WizardProgress current={2} total={5} />
+              <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>What&apos;s your height?</h1>
+              <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>Fine-tunes your BMR and body composition analysis</p>
+              <PillToggle
+                options={[{ label: 'CM', value: 'cm' }, { label: 'FT', value: 'ft' }]}
+                value={heightUnit}
+                onChange={setHeightUnit}
+              />
+              <input
+                type="number"
+                value={height}
+                onChange={e => setHeight(e.target.value === '' ? '' : Number(e.target.value))}
+                placeholder={heightUnit === 'cm' ? 'e.g. 178' : 'e.g. 5.9'}
+                className="premium-input"
+                style={{ marginBottom: 16 }}
+              />
+              <div style={{ flex: 1 }} />
+              <button
+                onClick={handleWizardNext}
+                disabled={height === ''}
+                className="btn-white"
+                style={{ marginBottom: 48 }}
+              >
+                Next
+              </button>
+            </motion.div>
+          )}
+
+          {/* Step 3 — Goal */}
+          {wizardStep === 3 && (
+            <motion.div key="goal" {...slide} style={colStyle}>
+              <BackBtn onBack={handleWizardBack} />
+              <WizardProgress current={3} total={5} />
+              <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>Your fitness goal?</h1>
+              <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>We&apos;ll tailor your transformation preview</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {GOALS.map((g) => (
+                  <motion.button
+                    key={g.value}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => { setGoal(g.value); setTimeout(() => setWizardStep(4), 180) }}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      width: '100%', padding: '16px 20px',
+                      background: goal === g.value ? 'rgba(92,224,208,0.08)' : 'var(--surface-2)',
+                      border: goal === g.value ? '1.5px solid var(--teal)' : '1px solid var(--border)',
+                      borderRadius: 20, textAlign: 'left', cursor: 'pointer',
+                      transition: 'border-color 0.15s, background 0.15s',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 16, fontWeight: 600, color: goal === g.value ? 'var(--teal)' : '#fff', marginBottom: 2 }}>{g.label}</div>
+                      <div style={{ fontSize: 13, color: 'var(--text-sub)' }}>{g.desc}</div>
+                    </div>
+                    <div style={{ fontSize: 18, color: 'var(--text-dim)' }}>›</div>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 4 — Diet preference */}
+          {wizardStep === 4 && (
+            <motion.div key="diet" {...slide} style={colStyle}>
+              <BackBtn onBack={handleWizardBack} />
+              <WizardProgress current={4} total={5} />
+              <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>Diet preference?</h1>
+              <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24 }}>Last step before your plan</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                {DIETS.map((d) => (
+                  <motion.button
+                    key={d.value}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => {
+                      const selectedDiet = d.value
+                      const currentGoal = goal!
+                      setState({
+                        age: age as number,
+                        weight: weight as number,
+                        weightUnit,
+                        height: height as number,
+                        heightUnit,
+                        goal: currentGoal,
+                        dietType: selectedDiet,
+                      })
+                      appState.current = getState()
+                      setTimeout(() => {
+                        setView('loading')
+                        startFetch()
+                      }, 180)
+                    }}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      padding: '32px 0',
+                      background: 'var(--surface-2)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 20, cursor: 'pointer',
+                      fontSize: 15, fontWeight: 600, color: '#fff',
+                      transition: 'border-color 0.15s',
+                    }}
+                  >
+                    {d.label}
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+        </AnimatePresence>
+      </main>
+    )
+  }
+
   /* ── Loading ── */
   if (view === 'loading') {
     return (
       <main style={{ minHeight: '100dvh', background: '#000', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px' }}>
-        {/* Scan ring */}
         <div style={{ position: 'relative', width: 120, height: 120, marginBottom: 40 }}>
           <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(circle, rgba(92,224,208,0.15) 0%, transparent 70%)' }} />
           <div className="scan-ring" style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid var(--teal)', opacity: 0.5 }} />
           <div className="scan-ring" style={{ position: 'absolute', inset: 14, borderRadius: '50%', border: '2px solid var(--teal)', opacity: 0.35, animationDelay: '0.4s' }} />
-          <div style={{
-            position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(92,224,208,0.10)', border: '1.5px solid var(--teal)' }} />
           </div>
         </div>
@@ -193,31 +466,24 @@ export default function DietPlanPage() {
         </div>
 
         <div style={{ flex: 1, padding: '0 24px 48px', overflowY: 'auto' }}>
-          {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
             <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Your Plan is Ready</h1>
             <p style={{ fontSize: 14, color: 'var(--text-sub)' }}>Unlock your personalized diet plan</p>
           </div>
 
-          {/* Blurred preview teaser */}
           <div className="premium-card" style={{ position: 'relative', marginBottom: 24, overflow: 'hidden', padding: '20px' }}>
             <div style={{ filter: 'blur(6px)', pointerEvents: 'none', userSelect: 'none' }}>
               <div style={{ height: 16, background: 'rgba(255,255,255,0.12)', borderRadius: 4, marginBottom: 12, width: '70%' }} />
               <div style={{ height: 12, background: 'rgba(255,255,255,0.08)', borderRadius: 4, marginBottom: 8, width: '90%' }} />
               <div style={{ height: 12, background: 'rgba(255,255,255,0.08)', borderRadius: 4, width: '60%' }} />
             </div>
-            <div style={{
-              position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)',
-            }}>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(2px)' }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.5)', marginBottom: 6, letterSpacing: '0.08em' }}>LOCKED</span>
               <span style={{ fontSize: 13, color: 'var(--text-sub)', fontWeight: 500 }}>Unlock to see</span>
             </div>
           </div>
 
-          {/* Pricing cards */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
-            {/* Weekly */}
             <div className="premium-card">
               <p className="section-label" style={{ marginBottom: 8 }}>WEEKLY</p>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 12 }}>
@@ -234,8 +500,6 @@ export default function DietPlanPage() {
                 Start Weekly — $4.99
               </button>
             </div>
-
-            {/* Monthly — BEST VALUE */}
             <div className="premium-card" style={{ borderColor: 'var(--teal)', background: 'rgba(92,224,208,0.04)', position: 'relative' }}>
               <div style={{ position: 'absolute', top: 16, right: 16 }}>
                 <span className="teal-badge">BEST VALUE</span>
@@ -260,7 +524,6 @@ export default function DietPlanPage() {
           <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)', marginBottom: 16 }}>
             Secure checkout · Cancel anytime · Instant access
           </p>
-
           <button
             onClick={handleDemo}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-dim)', fontSize: 13, textAlign: 'center', width: '100%', fontFamily: 'inherit', padding: '8px 0' }}
@@ -288,7 +551,6 @@ export default function DietPlanPage() {
 
   return (
     <main style={{ minHeight: '100dvh', background: '#000', display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', padding: '44px 20px 12px' }}>
         <button onClick={() => router.push('/plan')} style={{ fontSize: 24, color: 'var(--text-sub)', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1 }}>‹</button>
         <h1 style={{ flex: 1, textAlign: 'center', fontSize: 18, fontWeight: 600, color: '#fff' }}>Your Diet Plan</h1>
@@ -296,7 +558,6 @@ export default function DietPlanPage() {
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 48px' }}>
-        {/* Name + goal badge */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 20 }}>
           <h2 style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 8 }}>
             {s.name ? `${s.name}'s Plan` : 'Your Plan'}
@@ -304,7 +565,6 @@ export default function DietPlanPage() {
           <span className="teal-badge">{goalLabel}</span>
         </motion.div>
 
-        {/* Daily overview card */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="premium-card" style={{ marginBottom: 16 }}>
           <p className="section-label" style={{ marginBottom: 16 }}>DAILY OVERVIEW</p>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 20 }}>
@@ -318,7 +578,6 @@ export default function DietPlanPage() {
           </div>
         </motion.div>
 
-        {/* Meal schedule */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ marginBottom: 16 }}>
           <p className="section-label" style={{ marginBottom: 12 }}>MEAL SCHEDULE</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -344,7 +603,6 @@ export default function DietPlanPage() {
           </div>
         </motion.div>
 
-        {/* Weekly plan */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="premium-card" style={{ marginBottom: 16 }}>
           <p className="section-label" style={{ marginBottom: 14 }}>WEEKLY OVERVIEW</p>
           {(p.weeklyPlan ?? []).map((day, i) => (
@@ -359,7 +617,6 @@ export default function DietPlanPage() {
           ))}
         </motion.div>
 
-        {/* Tips */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="premium-card" style={{ marginBottom: 16 }}>
           <p className="section-label" style={{ marginBottom: 14 }}>TIPS FOR YOU</p>
           {(p.tips ?? []).map((tip, i) => (
