@@ -37,7 +37,7 @@ function InfluenceBar({ label, pct, teal, delay }: { label: string; pct: number;
 }
 
 /* ─────────────────────────────────────────────
-   Bar chart (Dating Reality)
+   Bar chart (The Dating Market Is Brutal)
 ───────────────────────────────────────────── */
 const CHART_DATA = [
   { x: '10%', v: 0 }, { x: '20%', v: 0 }, { x: '30%', v: 0 },
@@ -187,7 +187,7 @@ export default function OnboardingPage() {
                 Your Looks Are<br />Holding You Back
               </h1>
               <p style={{ fontSize: 14, color: 'var(--text-sub)', lineHeight: 1.6, marginBottom: 28, maxWidth: 320 }}>
-                A cognitive bias where we subconsciously assume someone&apos;s positive qualities based on their physical attractiveness.
+                People make up their minds about you in seconds. Studies show attractive people earn more, date better, and get treated differently — every single day.
               </p>
               <div style={{ display: 'flex', gap: 12 }}>
                 <div className="premium-card" style={{ flex: 1, textAlign: 'center' }}>
@@ -212,14 +212,14 @@ export default function OnboardingPage() {
             </div>
             <div className="bottom-card">
               <p style={{ fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.6, marginBottom: 20 }}>
-                It&apos;s not shallow, it&apos;s human nature. The Halo Effect states that you are treated and judged in vastly different ways depending on your looks.
+                This isn&apos;t an opinion. It&apos;s backed by decades of psychology research. The question is — what are you going to do about it?
               </p>
               <button onClick={next} className="btn-white">Next</button>
             </div>
           </motion.div>
         )}
 
-        {/* ── EDU: Dating Reality ── */}
+        {/* ── EDU: The Dating Market Is Brutal ── */}
         {step === 'edu_dating' && (
           <motion.div key="dating" {...slide} style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '48px 24px 0' }}>
@@ -232,9 +232,9 @@ export default function OnboardingPage() {
               <DatingChart />
             </div>
             <div className="bottom-card">
-              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 10, letterSpacing: '-0.02em' }}>Dating Reality</h2>
+              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 10, letterSpacing: '-0.02em' }}>The Dating Market Is Brutal</h2>
               <p style={{ fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.6, marginBottom: 20 }}>
-                The truth is, unless you are an objectively attractive individual, you will struggle in the current dating market. Studies show 80% of women match with the top 20% of men.
+                The top 10% of guys get 80% of the matches. If you&apos;re not in that group, you&apos;re invisible. Looks can be fixed — most people just don&apos;t know how.
               </p>
               <button onClick={next} className="btn-white">Next</button>
             </div>
@@ -248,7 +248,7 @@ export default function OnboardingPage() {
               <BackBtn onBack={back} />
               <p className="section-label" style={{ marginBottom: 12 }}>ATTRACTIVENESS IMPACT</p>
               <h1 style={{ fontSize: 26, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 28 }}>
-                Attractiveness Influence<br />Across Life Domains
+                Looks Change Everything
               </h1>
               <InfluenceBar label="Dating"       pct={80} teal  delay={300} />
               <InfluenceBar label="Popularity"   pct={65}       delay={450} />
@@ -256,7 +256,7 @@ export default function OnboardingPage() {
               <InfluenceBar label="Income"       pct={30}       delay={750} />
             </div>
             <div className="bottom-card">
-              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 10, letterSpacing: '-0.02em' }}>The Brutal Truth</h2>
+              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 10, letterSpacing: '-0.02em' }}>The Fix Exists</h2>
               <p style={{ fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.6, marginBottom: 20 }}>
                 99% of people don&apos;t realize how much attractiveness impacts their lives, especially for dating.
               </p>
@@ -270,8 +270,8 @@ export default function OnboardingPage() {
           <motion.div key="name" {...slide} style={colStyle}>
             <BackBtn onBack={back} />
             <ProgressBar step={step} />
-            <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>What&apos;s your name?</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 32 }}>This will be used to personalize your experience</p>
+            <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>First, what&apos;s your name?</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 32 }}>We&apos;ll build your personal glow-up plan around you.</p>
             <input
               type="text"
               value={name}
