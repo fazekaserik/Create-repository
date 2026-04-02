@@ -467,8 +467,8 @@ export default function DietPlanPage() {
 
         <div style={{ flex: 1, padding: '0 24px 48px', overflowY: 'auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Your Plan is Ready</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-sub)' }}>Unlock your personalized diet plan</p>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Your Glow-Up Starts Here</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-sub)' }}>Your body rated. Now let&apos;s actually fix it.</p>
           </div>
 
           <div className="premium-card" style={{ position: 'relative', marginBottom: 24, overflow: 'hidden', padding: '20px' }}>
@@ -490,14 +490,14 @@ export default function DietPlanPage() {
                 <span style={{ fontSize: 32, fontWeight: 700, color: '#fff' }}>$4.99</span>
                 <span style={{ fontSize: 16, color: 'var(--text-sub)' }}>/week</span>
               </div>
-              {['Full diet plan', 'Weekly meal plans', 'Macro calculator', 'Cancel anytime'].map(f => (
+              {['Custom meal plan built for your body', 'Exactly what to eat every day', 'Calories &amp; macros auto-calculated', 'Cancel anytime, no questions asked'].map(f => (
                 <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <span style={{ color: 'var(--green)', fontSize: 13 }}>✓</span>
                   <span style={{ fontSize: 13, color: 'var(--text-sub)' }}>{f}</span>
                 </div>
               ))}
               <button onClick={() => handleBuy('weekly')} className="btn-white" style={{ marginTop: 16 }}>
-                Start Weekly — $4.99
+                Unlock My Diet Plan — $4.99
               </button>
             </div>
             <div className="premium-card" style={{ borderColor: 'var(--teal)', background: 'rgba(92,224,208,0.04)', position: 'relative' }}>
@@ -509,20 +509,20 @@ export default function DietPlanPage() {
                 <span style={{ fontSize: 32, fontWeight: 700, color: '#fff' }}>$14.99</span>
                 <span style={{ fontSize: 16, color: 'var(--text-sub)' }}>/month</span>
               </div>
-              {['Full diet plan', 'Weekly meal plans', 'Macro calculator', 'Cancel anytime', 'Save 57% vs weekly'].map(f => (
+              {['Custom meal plan built for your body', 'Exactly what to eat every day', 'Calories &amp; macros auto-calculated', 'Cancel anytime, no questions asked', 'Save 57% vs weekly'].map(f => (
                 <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <span style={{ color: 'var(--green)', fontSize: 13 }}>✓</span>
                   <span style={{ fontSize: 13, color: f.includes('Save') ? 'var(--teal)' : 'var(--text-sub)' }}>{f}</span>
                 </div>
               ))}
               <button onClick={() => handleBuy('monthly')} className="btn-teal" style={{ marginTop: 16 }}>
-                Start Monthly — $14.99
+                Unlock My Diet Plan — $14.99
               </button>
             </div>
           </div>
 
           <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)', marginBottom: 16 }}>
-            Secure checkout · Cancel anytime · Instant access
+            Join 1,000+ people already glowing up
           </p>
           <button
             onClick={handleDemo}

@@ -473,8 +473,8 @@ export default function WorkoutPlanPage() {
 
         <div style={{ flex: 1, padding: '0 24px 48px', overflowY: 'auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Your Plan is Ready</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-sub)' }}>Unlock your personalized workout plan</p>
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Time to Build the Body You Want</h1>
+            <p style={{ fontSize: 14, color: 'var(--text-sub)' }}>Stop winging it. Here&apos;s exactly what to do.</p>
           </div>
 
           {/* Blurred preview */}
@@ -501,14 +501,14 @@ export default function WorkoutPlanPage() {
                 <span style={{ fontSize: 32, fontWeight: 700, color: '#fff' }}>$4.99</span>
                 <span style={{ fontSize: 16, color: 'var(--text-sub)' }}>/week</span>
               </div>
-              {['Full workout plan', 'Daily exercise lists', 'Sets & reps guide', 'Cancel anytime'].map(f => (
+              {['Custom workout plan for your goal', 'Every exercise, every set, every rep', 'Built around your gym or home setup', 'Cancel anytime, no questions asked'].map(f => (
                 <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <span style={{ color: 'var(--green)', fontSize: 13 }}>✓</span>
                   <span style={{ fontSize: 13, color: 'var(--text-sub)' }}>{f}</span>
                 </div>
               ))}
               <button onClick={() => handleBuy('weekly')} className="btn-white" style={{ marginTop: 16 }}>
-                Start Weekly — $4.99
+                Unlock My Workout Plan — $4.99
               </button>
             </div>
 
@@ -522,20 +522,20 @@ export default function WorkoutPlanPage() {
                 <span style={{ fontSize: 32, fontWeight: 700, color: '#fff' }}>$14.99</span>
                 <span style={{ fontSize: 16, color: 'var(--text-sub)' }}>/month</span>
               </div>
-              {['Full workout plan', 'Daily exercise lists', 'Sets & reps guide', 'Cancel anytime', 'Save 57% vs weekly'].map(f => (
+              {['Custom workout plan for your goal', 'Every exercise, every set, every rep', 'Built around your gym or home setup', 'Cancel anytime, no questions asked', 'Save 57% vs weekly'].map(f => (
                 <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <span style={{ color: 'var(--green)', fontSize: 13 }}>✓</span>
                   <span style={{ fontSize: 13, color: f.includes('Save') ? 'var(--teal)' : 'var(--text-sub)' }}>{f}</span>
                 </div>
               ))}
               <button onClick={() => handleBuy('monthly')} className="btn-teal" style={{ marginTop: 16 }}>
-                Start Monthly — $14.99
+                Unlock My Workout Plan — $14.99
               </button>
             </div>
           </div>
 
           <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)', marginBottom: 16 }}>
-            Secure checkout · Cancel anytime · Instant access
+            Join 1,000+ people already glowing up
           </p>
           <button
             onClick={handleDemo}
