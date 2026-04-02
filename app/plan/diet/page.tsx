@@ -490,7 +490,7 @@ export default function DietPlanPage() {
                 <span style={{ fontSize: 32, fontWeight: 700, color: '#fff' }}>$4.99</span>
                 <span style={{ fontSize: 16, color: 'var(--text-sub)' }}>/week</span>
               </div>
-              {['Custom meal plan built for your body', 'Exactly what to eat every day', 'Calories &amp; macros auto-calculated', 'Cancel anytime, no questions asked'].map(f => (
+              {['Custom meal plan built for your body', 'Exactly what to eat every day', 'Calories & macros auto-calculated', 'Cancel anytime, no questions asked'].map(f => (
                 <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <span style={{ color: 'var(--green)', fontSize: 13 }}>✓</span>
                   <span style={{ fontSize: 13, color: 'var(--text-sub)' }}>{f}</span>
@@ -509,7 +509,7 @@ export default function DietPlanPage() {
                 <span style={{ fontSize: 32, fontWeight: 700, color: '#fff' }}>$14.99</span>
                 <span style={{ fontSize: 16, color: 'var(--text-sub)' }}>/month</span>
               </div>
-              {['Custom meal plan built for your body', 'Exactly what to eat every day', 'Calories &amp; macros auto-calculated', 'Cancel anytime, no questions asked', 'Save 57% vs weekly'].map(f => (
+              {['Custom meal plan built for your body', 'Exactly what to eat every day', 'Calories & macros auto-calculated', 'Cancel anytime, no questions asked', 'Save 57% vs weekly'].map(f => (
                 <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <span style={{ color: 'var(--green)', fontSize: 13 }}>✓</span>
                   <span style={{ fontSize: 13, color: f.includes('Save') ? 'var(--teal)' : 'var(--text-sub)' }}>{f}</span>
