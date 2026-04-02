@@ -184,7 +184,7 @@ export default function OnboardingPage() {
                 <span className="teal-badge" style={{ marginBottom: 12, display: 'inline-flex' }}>THE HALO EFFECT</span>
               </div>
               <h1 style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 10, lineHeight: 1.1 }}>
-                Perception<br />Is Everything
+                Your Looks Are<br />Holding You Back
               </h1>
               <p style={{ fontSize: 14, color: 'var(--text-sub)', lineHeight: 1.6, marginBottom: 28, maxWidth: 320 }}>
                 A cognitive bias where we subconsciously assume someone&apos;s positive qualities based on their physical attractiveness.
