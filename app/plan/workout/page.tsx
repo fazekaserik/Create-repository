@@ -196,6 +196,7 @@ export default function WorkoutPlanPage() {
       clearInterval(iv)
       setProgress(100)
       setPlan(planData)
+      if (planData) setState({ workoutPlan: planData })
       const fresh = getState()
       if (fresh.tier !== 'free' || fresh.demoMode) {
         setView('plan')

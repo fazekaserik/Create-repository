@@ -5,6 +5,13 @@
 
 import type { Goal, GymType, DietType, BodyType, TransformPeriod, PhysiqueRating } from './types'
 
+export interface Meal { name: string; emoji: string; calories: number; items: string[]; time: string }
+export interface WeekDay { day: string; meals: string[] }
+export interface DietPlan { calories: number; protein: number; carbs: number; fat: number; meals: Meal[]; weeklyPlan: WeekDay[]; tips: string[] }
+export interface Exercise { name: string; sets: number; reps: string; rest: string; muscle: string }
+export interface WorkoutDay { day: string; focus: string; exercises: Exercise[] }
+export interface WorkoutPlan { daysPerWeek: number; splitType: string; schedule: WorkoutDay[]; restDays: string[]; restDayTips: string[]; progressionNotes: string; tips: string[] }
+
 export interface AppState {
   // onboarding
   originalImageUrl: string | null
@@ -29,6 +36,9 @@ export interface AppState {
   // subscription
   tier: 'free' | 'weekly' | 'monthly'
   activePeriod: TransformPeriod
+  // generated plans
+  dietPlan: DietPlan | null
+  workoutPlan: WorkoutPlan | null
 }
 
 const KEY = 'nextbody_state'
@@ -52,6 +62,8 @@ const defaults: AppState = {
   rating: null,
   tier: 'free',
   activePeriod: '1month',
+  dietPlan: null,
+  workoutPlan: null,
 }
 
 export function getState(): AppState {

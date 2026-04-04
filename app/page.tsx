@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useAuth, signOut } from '@/lib/auth'
+import { getState } from '@/lib/store'
 
 /* ─── helpers ─────────────────────────────────────────────── */
 function greeting(name: string) {
@@ -59,12 +60,123 @@ function Dashboard({ name, email }: { name: string; email: string }) {
   const [avatarOpen, setAvatarOpen] = useState(false)
   const initial = name.charAt(0).toUpperCase()
 
+  const appState = getState()
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' })
+  const todayWorkout = appState.workoutPlan?.schedule.find(d => d.day === today) ?? null
+  const isRestDay = !todayWorkout && (appState.workoutPlan?.restDays.includes(today) ?? false)
+  const todayMeals = appState.dietPlan?.meals ?? []
+  const dailyCalories = appState.dietPlan?.calories ?? null
+
   const quickActions = [
     { label: 'Get my rating', href: '/onboarding' },
     { label: 'View diet plan', href: '/plan/diet' },
     { label: 'View workout plan', href: '/plan/workout' },
     { label: 'See results', href: '/results' },
   ]
+
+  const startJourneyCard = (
+    <div style={{
+      background: 'linear-gradient(135deg, #0d211d 0%, #0a1a2e 100%)',
+      border: '1px solid rgba(92,224,208,0.15)',
+      borderRadius: 18, padding: '20px 18px',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+        <div style={{
+          width: 42, height: 42, borderRadius: 12,
+          background: 'rgba(92,224,208,0.12)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }} />
+        <div>
+          <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>Start your journey</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>Get your AI body analysis first</div>
+        </div>
+      </div>
+      <button
+        onClick={() => router.push('/onboarding')}
+        className="btn-teal"
+        style={{ padding: '13px 20px', fontSize: 14 }}
+      >
+        Get my rating →
+      </button>
+    </div>
+  )
+
+  const workoutCard = appState.workoutPlan ? (
+    <div className="premium-card">
+      <p className="section-label" style={{ marginBottom: 10 }}>TODAY&apos;S WORKOUT</p>
+      {isRestDay ? (
+        <>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>REST DAY — Recovery</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#000', background: 'var(--green)', padding: '2px 8px', borderRadius: 20 }}>REST</span>
+          </div>
+          {appState.workoutPlan.restDayTips[0] && (
+            <p style={{ fontSize: 13, color: 'var(--text-sub)' }}>{appState.workoutPlan.restDayTips[0]}</p>
+          )}
+        </>
+      ) : todayWorkout ? (
+        <>
+          <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--teal)', marginBottom: 10 }}>
+            {todayWorkout.day} — {todayWorkout.focus}
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 12 }}>
+            {todayWorkout.exercises.slice(0, 3).map((ex, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 13, color: '#fff' }}>• {ex.name}</span>
+                <span style={{ fontSize: 12, color: 'var(--teal)', fontWeight: 600 }}>{ex.sets}×{ex.reps}</span>
+              </div>
+            ))}
+            {todayWorkout.exercises.length > 3 && (
+              <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>+{todayWorkout.exercises.length - 3} more</span>
+            )}
+          </div>
+        </>
+      ) : (
+        <p style={{ fontSize: 13, color: 'var(--text-sub)', marginBottom: 12 }}>No session scheduled for today</p>
+      )}
+      <button
+        onClick={() => router.push('/plan/workout')}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--teal)', fontSize: 13, fontWeight: 600, padding: 0, fontFamily: 'inherit' }}
+      >
+        View Full Plan →
+      </button>
+    </div>
+  ) : null
+
+  const dietCard = appState.dietPlan ? (
+    <div className="premium-card">
+      <p className="section-label" style={{ marginBottom: 10 }}>TODAY&apos;S DIET</p>
+      {dailyCalories && (
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>{dailyCalories.toLocaleString()} kcal</span>
+          <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>
+            · P: {appState.dietPlan.protein}g &nbsp;C: {appState.dietPlan.carbs}g &nbsp;F: {appState.dietPlan.fat}g
+          </span>
+        </div>
+      )}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 10, marginBottom: 12 }}>
+        {todayMeals.map((meal, i) => (
+          <div key={i} style={{ marginBottom: i < todayMeals.length - 1 ? 10 : 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{meal.emoji} {meal.name}</span>
+              <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>{meal.calories} kcal · {meal.time}</span>
+            </div>
+            {meal.items?.length > 0 && (
+              <p style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 2 }}>
+                {meal.items.slice(0, 2).join(', ')}{meal.items.length > 2 ? '…' : ''}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={() => router.push('/plan/diet')}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--teal)', fontSize: 13, fontWeight: 600, padding: 0, fontFamily: 'inherit' }}
+      >
+        View Full Plan →
+      </button>
+    </div>
+  ) : null
 
   return (
     <main style={{
@@ -155,31 +267,12 @@ function Dashboard({ name, email }: { name: string; email: string }) {
       {/* ── Today's Focus ── */}
       <div style={{ padding: '0 20px 20px' }}>
         <p className="section-label" style={{ marginBottom: 12 }}>TODAY&apos;S FOCUS</p>
-        <div style={{
-          background: 'linear-gradient(135deg, #0d211d 0%, #0a1a2e 100%)',
-          border: '1px solid rgba(92,224,208,0.15)',
-          borderRadius: 18, padding: '20px 18px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-            <div style={{
-              width: 42, height: 42, borderRadius: 12,
-              background: 'rgba(92,224,208,0.12)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 20,
-            }} />
-            <div>
-              <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>Start your journey</div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>Get your AI body analysis first</div>
-            </div>
+        {workoutCard || dietCard ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {workoutCard ?? startJourneyCard}
+            {dietCard ?? startJourneyCard}
           </div>
-          <button
-            onClick={() => router.push('/onboarding')}
-            className="btn-teal"
-            style={{ padding: '13px 20px', fontSize: 14 }}
-          >
-            Get my rating →
-          </button>
-        </div>
+        ) : startJourneyCard}
       </div>
 
       {/* ── My Plans ── */}
