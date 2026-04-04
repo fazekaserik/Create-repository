@@ -5,14 +5,14 @@ import { useState } from 'react'
 import { useAuth, signOut } from '@/lib/auth'
 import { getState } from '@/lib/store'
 
-/* ─── helpers ─────────────────────────────────────────────── */
+/* âââ helpers âââââââââââââââââââââââââââââââââââââââââââââââ */
 function greeting(name: string) {
   const h = new Date().getHours()
   const tod = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening'
   return `Good ${tod}, ${name.split(' ')[0]}`
 }
 
-/* ─── sub-components ──────────────────────────────────────── */
+/* âââ sub-components ââââââââââââââââââââââââââââââââââââââââ */
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div style={{
@@ -54,7 +54,7 @@ function PlanCard({ title, subtitle, href, router }: { title: string; subtitle: 
   )
 }
 
-/* ─── Dashboard ───────────────────────────────────────────── */
+/* âââ Dashboard âââââââââââââââââââââââââââââââââââââââââââââ */
 function Dashboard({ name, email }: { name: string; email: string }) {
   const router = useRouter()
   const [avatarOpen, setAvatarOpen] = useState(false)
@@ -96,7 +96,7 @@ function Dashboard({ name, email }: { name: string; email: string }) {
         className="btn-teal"
         style={{ padding: '13px 20px', fontSize: 14 }}
       >
-        Get my rating →
+        Get my rating â
       </button>
     </div>
   )
@@ -107,7 +107,7 @@ function Dashboard({ name, email }: { name: string; email: string }) {
       {isRestDay ? (
         <>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>REST DAY — Recovery</span>
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>REST DAY â Recovery</span>
             <span style={{ fontSize: 10, fontWeight: 700, color: '#000', background: 'var(--green)', padding: '2px 8px', borderRadius: 20 }}>REST</span>
           </div>
           {appState.workoutPlan.restDayTips[0] && (
@@ -117,13 +117,13 @@ function Dashboard({ name, email }: { name: string; email: string }) {
       ) : todayWorkout ? (
         <>
           <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--teal)', marginBottom: 10 }}>
-            {todayWorkout.day} — {todayWorkout.focus}
+            {todayWorkout.day} â {todayWorkout.focus}
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 12 }}>
             {todayWorkout.exercises.slice(0, 3).map((ex, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 13, color: '#fff' }}>• {ex.name}</span>
-                <span style={{ fontSize: 12, color: 'var(--teal)', fontWeight: 600 }}>{ex.sets}×{ex.reps}</span>
+                <span style={{ fontSize: 13, color: '#fff' }}>â¢ {ex.name}</span>
+                <span style={{ fontSize: 12, color: 'var(--teal)', fontWeight: 600 }}>{ex.sets}Ã{ex.reps}</span>
               </div>
             ))}
             {todayWorkout.exercises.length > 3 && (
@@ -138,7 +138,7 @@ function Dashboard({ name, email }: { name: string; email: string }) {
         onClick={() => router.push('/plan/workout')}
         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--teal)', fontSize: 13, fontWeight: 600, padding: 0, fontFamily: 'inherit' }}
       >
-        View Full Plan →
+        View Full Plan â
       </button>
     </div>
   ) : null
@@ -150,7 +150,7 @@ function Dashboard({ name, email }: { name: string; email: string }) {
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>{dailyCalories.toLocaleString()} kcal</span>
           <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>
-            · P: {appState.dietPlan.protein}g &nbsp;C: {appState.dietPlan.carbs}g &nbsp;F: {appState.dietPlan.fat}g
+            Â· P: {appState.dietPlan.protein}g &nbsp;C: {appState.dietPlan.carbs}g &nbsp;F: {appState.dietPlan.fat}g
           </span>
         </div>
       )}
@@ -159,11 +159,11 @@ function Dashboard({ name, email }: { name: string; email: string }) {
           <div key={i} style={{ marginBottom: i < todayMeals.length - 1 ? 10 : 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{meal.emoji} {meal.name}</span>
-              <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>{meal.calories} kcal · {meal.time}</span>
+              <span style={{ fontSize: 12, color: 'var(--text-dim)' }}>{meal.calories} kcal Â· {meal.time}</span>
             </div>
             {meal.items?.length > 0 && (
               <p style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 2 }}>
-                {meal.items.slice(0, 2).join(', ')}{meal.items.length > 2 ? '…' : ''}
+                {meal.items.slice(0, 2).join(', ')}{meal.items.length > 2 ? 'â¦' : ''}
               </p>
             )}
           </div>
@@ -173,7 +173,7 @@ function Dashboard({ name, email }: { name: string; email: string }) {
         onClick={() => router.push('/plan/diet')}
         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--teal)', fontSize: 13, fontWeight: 600, padding: 0, fontFamily: 'inherit' }}
       >
-        View Full Plan →
+        View Full Plan â
       </button>
     </div>
   ) : null
@@ -184,7 +184,7 @@ function Dashboard({ name, email }: { name: string; email: string }) {
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif',
       paddingBottom: 40,
     }}>
-      {/* ── Top bar ── */}
+      {/* ââ Top bar ââ */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '56px 20px 16px',
@@ -196,8 +196,9 @@ function Dashboard({ name, email }: { name: string; email: string }) {
             width: 32, height: 32, borderRadius: 8,
             background: '#000', border: '1px solid rgba(92,224,208,0.4)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 11, fontWeight: 800, color: 'var(--teal)',
-          }}>NB</div>
+          }}>
+            <img src="/logo.svg" alt="NextBody" style={{ width: 24, height: 24 }} />
+          </div>
           <span style={{ fontSize: 17, fontWeight: 700, color: '#fff' }}>NextBody</span>
         </div>
 
@@ -247,7 +248,7 @@ function Dashboard({ name, email }: { name: string; email: string }) {
         </div>
       </div>
 
-      {/* ── Greeting ── */}
+      {/* ââ Greeting ââ */}
       <div style={{ padding: '4px 20px 20px' }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em', margin: 0 }}>
           {greeting(name)}
@@ -257,14 +258,14 @@ function Dashboard({ name, email }: { name: string; email: string }) {
         </p>
       </div>
 
-      {/* ── Stats row ── */}
+      {/* ââ Stats row ââ */}
       <div style={{ padding: '0 20px 20px', display: 'flex', gap: 10 }}>
-        <StatCard label="Rating" value="—" sub="Not rated yet" />
+        <StatCard label="Rating" value="â" sub="Not rated yet" />
         <StatCard label="Streak" value="0" sub="Days" />
         <StatCard label="Day" value={`${new Date().getDate()}`} />
       </div>
 
-      {/* ── Today's Focus ── */}
+      {/* ââ Today's Focus ââ */}
       <div style={{ padding: '0 20px 20px' }}>
         <p className="section-label" style={{ marginBottom: 12 }}>TODAY&apos;S FOCUS</p>
         {workoutCard || dietCard ? (
@@ -275,7 +276,7 @@ function Dashboard({ name, email }: { name: string; email: string }) {
         ) : startJourneyCard}
       </div>
 
-      {/* ── My Plans ── */}
+      {/* ââ My Plans ââ */}
       <div style={{ padding: '0 20px 20px' }}>
         <p className="section-label" style={{ marginBottom: 12 }}>MY PLANS</p>
         <div style={{ display: 'flex', gap: 12 }}>
@@ -284,7 +285,7 @@ function Dashboard({ name, email }: { name: string; email: string }) {
         </div>
       </div>
 
-      {/* ── Quick Actions ── */}
+      {/* ââ Quick Actions ââ */}
       <div style={{ padding: '0 20px' }}>
         <p className="section-label" style={{ marginBottom: 12 }}>QUICK ACTIONS</p>
         <div style={{
@@ -309,7 +310,7 @@ function Dashboard({ name, email }: { name: string; email: string }) {
               onTouchEnd={e => { (e.currentTarget as HTMLButtonElement).style.background = 'none' }}
             >
               <span style={{ fontSize: 15, color: '#fff', fontWeight: 500 }}>{a.label}</span>
-              <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.25)', fontSize: 16 }}>›</span>
+              <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.25)', fontSize: 16 }}>âº</span>
             </button>
           ))}
         </div>
@@ -318,7 +319,7 @@ function Dashboard({ name, email }: { name: string; email: string }) {
   )
 }
 
-/* ─── Welcome / Landing ───────────────────────────────────── */
+/* âââ Welcome / Landing âââââââââââââââââââââââââââââââââââââ */
 function WelcomePage() {
   const router = useRouter()
 
@@ -336,7 +337,7 @@ function WelcomePage() {
         fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif',
       }}
     >
-      {/* ── Teal radial background glow ── */}
+      {/* ââ Teal radial background glow ââ */}
       <div
         className="bg-glow-in"
         style={{
@@ -345,7 +346,7 @@ function WelcomePage() {
         }}
       />
 
-      {/* ── Film grain texture ── */}
+      {/* ââ Film grain texture ââ */}
       <div
         style={{
           position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
@@ -356,7 +357,7 @@ function WelcomePage() {
         }}
       />
 
-      {/* ── Language selector — glassmorphism ── */}
+      {/* ââ Language selector â glassmorphism ââ */}
       <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 20 }}>
         <button
           style={{
@@ -384,7 +385,7 @@ function WelcomePage() {
         </button>
       </div>
 
-      {/* ── Upper section — phone centered ── */}
+      {/* ââ Upper section â phone centered ââ */}
       <div
         style={{
           flex: 1,
@@ -407,15 +408,7 @@ function WelcomePage() {
             zIndex: 5,
           }}
         >
-          <p style={{
-            margin: 0,
-            fontSize: 22,
-            fontWeight: 200,
-            color: '#fff',
-            textTransform: 'uppercase',
-          }}>
-            NextBody
-          </p>
+          <img src="/logo.svg" alt="NextBody" style={{ width: 70, height: 70, opacity: 0.9 }} />
         </div>
 
         {/* Phone wrapper */}
@@ -454,10 +447,27 @@ function WelcomePage() {
             <div style={{ position:'absolute', right:-9, top:108, width:3, height:66, background:'#2a2a2a', borderRadius:2 }} />
 
             {/* Hero image */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'url(/hero.jpg) center top / cover no-repeat, linear-gradient(180deg,#1e1e1e,#0a0a0a)',
-            }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,#0d1a17,#080808)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ position: 'absolute', top: '35%', left: '50%', transform: 'translate(-50%,-50%)', width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(92,224,208,0.2) 0%, transparent 70%)', filter: 'blur(16px)' }} />
+              <svg width="140" height="220" viewBox="0 0 100 160" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ position: 'relative', zIndex: 2, marginTop: 16, filter: 'drop-shadow(0 0 10px rgba(92,224,208,0.55))' }}>
+                <circle cx="50" cy="12" r="9" stroke="#5ce0d0" strokeWidth="1.8" fill="none"/>
+                <line x1="50" y1="21" x2="50" y2="28" stroke="#5ce0d0" strokeWidth="1.8" strokeLinecap="round"/>
+                <path d="M24 32 C24 32 18 36 17 46 C16 54 18 60 22 64 C18 66 14 72 13 82 L87 82 C86 72 82 66 78 64 C82 60 84 54 83 46 C82 36 76 32 76 32 C70 27 60 24 50 24 C40 24 30 27 24 32 Z" stroke="#5ce0d0" strokeWidth="1.8" fill="rgba(92,224,208,0.04)" strokeLinejoin="round"/>
+                <path d="M34 58 C38 63 44 65 50 65 C56 65 62 63 66 58" stroke="#5ce0d0" strokeWidth="1.3" fill="none" strokeLinecap="round"/>
+                <line x1="44" y1="68" x2="44" y2="80" stroke="#5ce0d0" strokeWidth="1.2" strokeLinecap="round"/>
+                <line x1="56" y1="68" x2="56" y2="80" stroke="#5ce0d0" strokeWidth="1.2" strokeLinecap="round"/>
+                <line x1="35" y1="72" x2="65" y2="72" stroke="#5ce0d0" strokeWidth="1" strokeLinecap="round"/>
+                <line x1="35" y1="78" x2="65" y2="78" stroke="#5ce0d0" strokeWidth="1" strokeLinecap="round"/>
+                <path d="M17 46 C14 54 13 66 15 76 C16 82 18 86 20 88" stroke="#5ce0d0" strokeWidth="1.6" fill="none" strokeLinecap="round"/>
+                <path d="M83 46 C86 54 87 66 85 76 C84 82 82 86 80 88" stroke="#5ce0d0" strokeWidth="1.6" fill="none" strokeLinecap="round"/>
+                <path d="M13 82 C12 96 13 110 16 124 C18 132 22 140 26 148" stroke="#5ce0d0" strokeWidth="1.6" fill="none" strokeLinecap="round"/>
+                <path d="M87 82 C88 96 87 110 84 124 C82 132 78 140 74 148" stroke="#5ce0d0" strokeWidth="1.6" fill="none" strokeLinecap="round"/>
+                <path d="M2 20 L2 2 L20 2" stroke="rgba(92,224,208,0.45)" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M80 2 L98 2 L98 20" stroke="rgba(92,224,208,0.45)" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 138 L2 158 L20 158" stroke="rgba(92,224,208,0.45)" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M80 158 L98 158 L98 138" stroke="rgba(92,224,208,0.45)" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
 
             {/* Corner ambient light */}
             <div style={{
@@ -489,7 +499,7 @@ function WelcomePage() {
         </div>
       </div>
 
-      {/* ── Bottom content — headline + CTAs ── */}
+      {/* ââ Bottom content â headline + CTAs ââ */}
       <div
         style={{
           width: '100%',
@@ -573,11 +583,11 @@ function WelcomePage() {
   )
 }
 
-/* ─── Root page ───────────────────────────────────────────── */
+/* âââ Root page âââââââââââââââââââââââââââââââââââââââââââââ */
 export default function Page() {
   const { user, isLoggedIn, mounted } = useAuth()
 
-  // Prevent SSR/hydration flash
+  // Prevent SSR/hydration flashh
   if (!mounted) {
     return <main style={{ minHeight: '100dvh', background: '#000' }} />
   }
