@@ -5,7 +5,7 @@ import HamburgerMenu from '@/components/HamburgerMenu'
 export const metadata: Metadata = {
   title: 'NextBody — See Your Transformation',
   description: 'Upload a photo and see your body transformation in 90 days. AI-powered fitness visualization.',
-  openGraph: {
+  icons: { icon: '/logo.svg', apple: '/logo.svg' },  openGraph: {
     title: 'NextBody — See Your Transformation',
     description: 'Upload a photo and see your body transformation in 90 days.',
     type: 'website',
