@@ -38,7 +38,7 @@ export default function LoadingPage() {
     processed.current = true
     const run = async () => {
       const state = getState()
-      if (!state.uploadedImageDataUrl || !state.goal) { router.push('/'); return }
+      if (!state.uploadedImageDataUrl) { router.push('/'); return }
       try {
         const [classifyRes, rateRes] = await Promise.all([
           fetch('/api/classify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ imageUrl: state.uploadedImageDataUrl }) }).then(r => r.json()),
