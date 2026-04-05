@@ -316,7 +316,7 @@ export default function OnboardingPage() {
     center: { opacity: 1, x: 0 },
     exit: (dir: number) => ({ opacity: 0, x: dir * -32 }),
   }
-  const transition = { duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }
+  const transition = { duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] as const }
 
   const wrapStyle: React.CSSProperties = {
     minHeight: '100dvh',
