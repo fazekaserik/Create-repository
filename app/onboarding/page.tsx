@@ -1,149 +1,287 @@
 'use client'
-
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { setState } from '@/lib/store'
+import type { Goal, GymType } from '@/lib/types'
 
 /* ─────────────────────────────────────────────
-   Step definitions  (age / weight / height / goal / gym / diet moved to plan pages)
+   Step definitions — Cal.ai-inspired onboarding
+   for NextBody fitness transformation app
 ───────────────────────────────────────────── */
 type Step =
-  | 'edu_halo'
-  | 'edu_dating'
-  | 'edu_influence'
-  | 'quiz_name'
+  | 'goal'
+  | 'sex'
+  | 'age'
+  | 'weight'
+  | 'height'
+  | 'gym'
+  | 'name'
   | 'upload'
 
-const EDU_STEPS: Step[] = ['edu_halo', 'edu_dating', 'edu_influence']
-const QUIZ_STEPS: Step[] = ['quiz_name', 'upload']
-const ALL_STEPS: Step[] = [...EDU_STEPS, ...QUIZ_STEPS]
+const ALL_STEPS: Step[] = ['goal', 'sex', 'age', 'weight', 'height', 'gym', 'name', 'upload']
 
-/* ─────────────────────────────────────────────
-   Animated bar (for influence screen)
-───────────────────────────────────────────── */
-function InfluenceBar({ label, pct, teal, delay }: { label: string; pct: number; teal?: boolean; delay: number }) {
-  const [w, setW] = useState(0)
-  useEffect(() => { const t = setTimeout(() => setW(pct), delay); return () => clearTimeout(t) }, [pct, delay])
+/* ─── Pill toggle (kg/lbs, cm/ft) ─── */
+function UnitToggle({
+  options,
+  value,
+  onChange,
+}: {
+  options: [string, string]
+  value: string
+  onChange: (v: string) => void
+}) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-      <span style={{ fontSize: 14, fontWeight: 600, width: 112, flexShrink: 0, color: teal ? 'var(--teal)' : '#fff' }}>{label}</span>
-      <div className="hbar-track" style={{ flex: 1 }}>
-        <div className={teal ? 'hbar-fill-teal' : 'hbar-fill-white'} style={{ width: `${w}%` }} />
-      </div>
-      <span style={{ fontSize: 13, fontWeight: 700, width: 36, textAlign: 'right', color: teal ? 'var(--teal)' : '#fff' }}>{pct}%</span>
-    </div>
-  )
-}
-
-/* ─────────────────────────────────────────────
-   Bar chart (The Dating Market Is Brutal)
-───────────────────────────────────────────── */
-const CHART_DATA = [
-  { x: '10%', v: 0 }, { x: '20%', v: 0 }, { x: '30%', v: 0 },
-  { x: '40%', v: 0 }, { x: '50%', v: 0 }, { x: '60%', v: 1 },
-  { x: '70%', v: 4 }, { x: '80%', v: 8 }, { x: '90%', v: 17 },
-  { x: '100%', v: 39, teal: true },
-]
-const MAX_V = 39
-
-function DatingChart() {
-  const [animated, setAnimated] = useState(false)
-  useEffect(() => { const t = setTimeout(() => setAnimated(true), 400); return () => clearTimeout(t) }, [])
-  return (
-    <div style={{ padding: '0 4px' }}>
-      <p className="section-label" style={{ marginBottom: 4 }}>AVG # OF LIKES / WK</p>
-      <div style={{ height: 1, background: 'rgba(255,255,255,0.10)', marginBottom: 12 }} />
-      <div style={{ position: 'relative', height: 180 }}>
-        {[0.25, 0.5, 0.75, 1].map(f => (
-          <div key={f} style={{ position: 'absolute', left: 0, right: 0, bottom: `${f * 100}%`, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-        ))}
-        <div style={{ position: 'absolute', right: 44, top: 6, fontSize: 10, color: 'rgba(255,255,255,0.45)', whiteSpace: 'nowrap' }}>
-          Top 10% Dating Profiles →
-        </div>
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'flex-end', gap: 3 }}>
-          {CHART_DATA.map((d) => {
-            const h = animated ? (d.v / MAX_V) * 100 : 0
-            return (
-              <div key={d.x} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%' }}>
-                {d.v > 0 && (
-                  <span style={{ fontSize: 10, color: d.teal ? 'var(--teal)' : '#fff', marginBottom: 2, fontWeight: 700 }}>{d.v}</span>
-                )}
-                <div
-                  className="chart-bar"
-                  style={{
-                    width: '100%',
-                    height: `${h}%`,
-                    background: d.teal ? 'linear-gradient(to top, #5ce0d0, #4ade80)' : '#2a2a2a',
-                    boxShadow: d.teal ? '0 0 12px rgba(92,224,208,0.5)' : 'none',
-                    transition: 'height 0.9s cubic-bezier(.25,.46,.45,.94)',
-                    minHeight: d.v > 0 ? 3 : 1,
-                  }}
-                />
-              </div>
-            )
-          })}
-        </div>
-      </div>
-      <div style={{ display: 'flex', gap: 3, marginTop: 6 }}>
-        {CHART_DATA.map((d) => (
-          <div key={d.x} style={{ flex: 1, textAlign: 'center', fontSize: 9, color: d.teal ? 'var(--teal)' : 'rgba(255,255,255,0.35)' }}>{d.x}</div>
-        ))}
-      </div>
-      <p className="section-label" style={{ textAlign: 'center', marginTop: 10 }}>ATTRACTIVENESS SCORE</p>
-    </div>
-  )
-}
-
-/* ─────────────────────────────────────────────
-   Progress bar (quiz only)
-───────────────────────────────────────────── */
-function ProgressBar({ step }: { step: Step }) {
-  const idx = QUIZ_STEPS.indexOf(step)
-  if (idx < 0) return null
-  return (
-    <div className="progress-bar">
-      {QUIZ_STEPS.map((_, i) => (
-        <div key={i} className={`progress-seg ${i <= idx ? 'active' : ''}`} />
+    <div style={{
+      display: 'inline-flex',
+      background: 'rgba(255,255,255,0.07)',
+      border: '1px solid rgba(255,255,255,0.10)',
+      borderRadius: 100,
+      padding: 3,
+      gap: 2,
+    }}>
+      {options.map((opt) => (
+        <button
+          key={opt}
+          onClick={() => onChange(opt)}
+          style={{
+            padding: '7px 18px',
+            borderRadius: 100,
+            border: 'none',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            transition: 'all 0.2s cubic-bezier(0.25,0.46,0.45,0.94)',
+            background: value === opt ? '#fff' : 'transparent',
+            color: value === opt ? '#000' : 'rgba(255,255,255,0.45)',
+            boxShadow: value === opt ? '0 2px 8px rgba(0,0,0,0.4)' : 'none',
+          }}
+        >
+          {opt}
+        </button>
       ))}
     </div>
   )
 }
 
-/* ─────────────────────────────────────────────
-   Back button
-───────────────────────────────────────────── */
+/* ─── Number scroll picker ─── */
+function NumericPicker({
+  value,
+  onChange,
+  min,
+  max,
+  unit,
+}: {
+  value: number
+  onChange: (v: number) => void
+  min: number
+  max: number
+  unit: string
+}) {
+  const increment = () => onChange(Math.min(max, value + 1))
+  const decrement = () => onChange(Math.max(min, value - 1))
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, margin: '0 auto' }}>
+      <button
+        onClick={decrement}
+        style={{
+          width: 52, height: 52, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.07)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          color: '#fff', fontSize: 26, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'background 0.15s',
+          fontFamily: 'inherit',
+        }}
+        onTouchStart={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.14)' }}
+        onTouchEnd={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.07)' }}
+      >
+        −
+      </button>
+      <div style={{ textAlign: 'center', minWidth: 120 }}>
+        <span style={{
+          fontSize: 72,
+          fontWeight: 800,
+          color: '#fff',
+          letterSpacing: '-0.04em',
+          lineHeight: 1,
+          display: 'block',
+        }}>
+          {value}
+        </span>
+        <span style={{ fontSize: 16, color: 'var(--teal)', fontWeight: 600, marginTop: 4, display: 'block' }}>
+          {unit}
+        </span>
+      </div>
+      <button
+        onClick={increment}
+        style={{
+          width: 52, height: 52, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.07)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          color: '#fff', fontSize: 26, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'background 0.15s',
+          fontFamily: 'inherit',
+        }}
+        onTouchStart={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.14)' }}
+        onTouchEnd={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.07)' }}
+      >
+        +
+      </button>
+    </div>
+  )
+}
+
+/* ─── Step progress dots ─── */
+function StepDots({ current }: { current: Step }) {
+  const idx = ALL_STEPS.indexOf(current)
+  return (
+    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+      {ALL_STEPS.map((_, i) => (
+        <div
+          key={i}
+          style={{
+            width: i === idx ? 22 : 7,
+            height: 7,
+            borderRadius: 4,
+            background: i === idx ? '#fff' : i < idx ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.12)',
+            transition: 'all 0.3s cubic-bezier(0.25,0.46,0.45,0.94)',
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+/* ─── Back button ─── */
 function BackBtn({ onBack }: { onBack: () => void }) {
   return (
     <button
       onClick={onBack}
-      style={{ fontSize: 22, color: 'var(--text-sub)', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 16, alignSelf: 'flex-start', lineHeight: 1 }}
-    >‹</button>
+      style={{
+        width: 40, height: 40,
+        borderRadius: '50%',
+        background: 'rgba(255,255,255,0.07)',
+        border: '1px solid rgba(255,255,255,0.10)',
+        color: '#fff', fontSize: 20,
+        cursor: 'pointer', display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        lineHeight: 1, transition: 'background 0.15s',
+        flexShrink: 0,
+      }}
+    >
+      ‹
+    </button>
   )
 }
 
-/* ─────────────────────────────────────────────
-   Main component
-───────────────────────────────────────────── */
+/* ─── Step header row ─── */
+function StepHeader({ step, onBack }: { step: Step; onBack: () => void }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+      <BackBtn onBack={onBack} />
+      <StepDots current={step} />
+      <div style={{ width: 40 }} />
+    </div>
+  )
+}
+
+/* ─── Selection card ─── */
+function SelectCard({
+  icon, title, subtitle, selected, onClick,
+}: {
+  icon: string; title: string; subtitle?: string; selected: boolean; onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        width: '100%',
+        background: selected ? 'rgba(92,224,208,0.08)' : 'rgba(255,255,255,0.03)',
+        border: `1.5px solid ${selected ? 'var(--teal)' : 'rgba(255,255,255,0.08)'}`,
+        borderRadius: 20,
+        padding: '18px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        cursor: 'pointer',
+        textAlign: 'left',
+        fontFamily: 'inherit',
+        transition: 'all 0.2s cubic-bezier(0.25,0.46,0.45,0.94)',
+        boxShadow: selected ? '0 0 0 1px rgba(92,224,208,0.2), 0 4px 24px rgba(92,224,208,0.08)' : 'none',
+      }}
+    >
+      <span style={{ fontSize: 28, flexShrink: 0 }}>{icon}</span>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 16, fontWeight: 600, color: selected ? '#fff' : 'rgba(255,255,255,0.85)' }}>
+          {title}
+        </div>
+        {subtitle && (
+          <div style={{ fontSize: 13, color: selected ? 'var(--teal)' : 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+            {subtitle}
+          </div>
+        )}
+      </div>
+      <div style={{
+        width: 22, height: 22, borderRadius: '50%',
+        border: `2px solid ${selected ? 'var(--teal)' : 'rgba(255,255,255,0.15)'}`,
+        background: selected ? 'var(--teal)' : 'transparent',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.2s',
+        flexShrink: 0,
+      }}>
+        {selected && (
+          <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+            <path d="M1 4L4.5 7.5L11 1" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+      </div>
+    </button>
+  )
+}
+
+/* ─── Main ─── */
 export default function OnboardingPage() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [step, setStep] = useState<Step>('edu_halo')
 
-  // Quiz state
+  const [step, setStep] = useState<Step>('goal')
+  const [direction, setDirection] = useState(1) // 1 = forward, -1 = back
+
+  // Data state
+  const [goal, setGoal] = useState<Goal | null>(null)
+  const [sex, setSex] = useState<'male' | 'female' | null>(null)
+  const [age, setAge] = useState(25)
+  const [weight, setWeight] = useState(75)
+  const [weightUnit, setWeightUnit] = useState<'kg' | 'lbs'>('kg')
+  const [height, setHeight] = useState(175)
+  const [heightUnit, setHeightUnit] = useState<'cm' | 'ft'>('cm')
+  const [heightFt, setHeightFt] = useState(5)
+  const [heightIn, setHeightIn] = useState(9)
+  const [gym, setGym] = useState<GymType | null>(null)
   const [name, setName] = useState('')
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
 
   const next = useCallback(() => {
     const idx = ALL_STEPS.indexOf(step)
-    if (idx < ALL_STEPS.length - 1) setStep(ALL_STEPS[idx + 1])
+    if (idx < ALL_STEPS.length - 1) {
+      setDirection(1)
+      setStep(ALL_STEPS[idx + 1])
+    }
   }, [step])
 
   const back = useCallback(() => {
     const idx = ALL_STEPS.indexOf(step)
-    if (idx > 0) setStep(ALL_STEPS[idx - 1])
-    else router.push('/')
+    if (idx > 0) {
+      setDirection(-1)
+      setStep(ALL_STEPS[idx - 1])
+    } else {
+      router.push('/')
+    }
   }, [step, router])
 
   const handleFile = useCallback((file: File) => {
@@ -159,178 +297,326 @@ export default function OnboardingPage() {
 
   const handleSubmit = () => {
     if (!imagePreview) return
+    setState({
+      goal: goal ?? 'build',
+      sex: sex ?? 'male',
+      age,
+      weight: weightUnit === 'lbs' ? Math.round(weight * 0.453592) : weight,
+      weightUnit: 'kg',
+      height: heightUnit === 'ft' ? Math.round(heightFt * 30.48 + heightIn * 2.54) : height,
+      heightUnit: 'cm',
+      gymType: gym ?? 'gym',
+      name: name.trim() || null,
+    })
     router.push('/loading')
   }
 
-  const slide = {
-    initial: { opacity: 0, x: 28 },
-    animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -28 },
-    transition: { duration: 0.22 },
+  const slideVariants = {
+    enter: (dir: number) => ({ opacity: 0, x: dir * 32 }),
+    center: { opacity: 1, x: 0 },
+    exit: (dir: number) => ({ opacity: 0, x: dir * -32 }),
+  }
+  const transition = { duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }
+
+  const wrapStyle: React.CSSProperties = {
+    minHeight: '100dvh',
+    background: '#000',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '52px 24px 0',
+    position: 'relative',
+    overflow: 'hidden',
   }
 
-  const colStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', minHeight: '100dvh', padding: '48px 24px 0' }
-
   return (
-    <main style={{ minHeight: '100dvh', background: '#000', display: 'flex', flexDirection: 'column' }}>
-      <AnimatePresence mode="wait">
+    <main style={{ minHeight: '100dvh', background: '#000', overflow: 'hidden' }}>
+      {/* Ambient glow */}
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(92,224,208,0.06) 0%, transparent 70%)',
+      }} />
 
-        {/* ── EDU: Halo Effect ── */}
-        {step === 'edu_halo' && (
-          <motion.div key="halo" {...slide} style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '48px 24px 0' }}>
-              <BackBtn onBack={back} />
-              <div style={{ marginBottom: 8 }}>
-                <span className="teal-badge" style={{ marginBottom: 12, display: 'inline-flex' }}>THE HALO EFFECT</span>
-              </div>
-              <h1 style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 10, lineHeight: 1.1 }}>
-                Your Looks Are<br />Holding You Back
-              </h1>
-              <p style={{ fontSize: 14, color: 'var(--text-sub)', lineHeight: 1.6, marginBottom: 28, maxWidth: 320 }}>
-                People make up their minds about you in seconds. Studies show attractive people earn more, date better, and get treated differently — every single day.
-              </p>
-              <div style={{ display: 'flex', gap: 12 }}>
-                <div className="premium-card" style={{ flex: 1, textAlign: 'center' }}>
-                  <div style={{ marginBottom: 12 }} />
-                  {['intelligent', 'kind', 'rich'].map(t => (
-                    <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                      <span style={{ color: 'var(--green)', fontSize: 15, fontWeight: 700 }}>✓</span>
-                      <span style={{ fontSize: 13, color: '#fff', textTransform: 'capitalize' }}>{t}</span>
-                    </div>
-                  ))}
+      <AnimatePresence mode="wait" custom={direction}>
+        {/* ── GOAL ── */}
+        {step === 'goal' && (
+          <motion.div key="goal" custom={direction} variants={slideVariants}
+            initial="enter" animate="center" exit="exit" transition={transition}
+            style={wrapStyle}>
+            <StepHeader step={step} onBack={back} />
+            <p className="section-label" style={{ marginBottom: 10 }}>STEP 1 OF 8</p>
+            <h1 style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.1, marginBottom: 8 }}>
+              What's your<br />main goal?
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 32, lineHeight: 1.5 }}>
+              We'll build your entire transformation plan around this.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+              <SelectCard icon="🔥" title="Lose Body Fat" subtitle="Get lean & shredded" selected={goal === 'cut'} onClick={() => setGoal('cut')} />
+              <SelectCard icon="💪" title="Build Muscle" subtitle="Pack on size & strength" selected={goal === 'build'} onClick={() => setGoal('build')} />
+              <SelectCard icon="⚡" title="Bulk Up" subtitle="Maximize mass fast" selected={goal === 'bulk'} onClick={() => setGoal('bulk')} />
+            </div>
+            <div style={{ padding: '24px 0 48px' }}>
+              <button onClick={next} disabled={!goal} className="btn-white">Continue</button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── SEX ── */}
+        {step === 'sex' && (
+          <motion.div key="sex" custom={direction} variants={slideVariants}
+            initial="enter" animate="center" exit="exit" transition={transition}
+            style={wrapStyle}>
+            <StepHeader step={step} onBack={back} />
+            <p className="section-label" style={{ marginBottom: 10 }}>STEP 2 OF 8</p>
+            <h1 style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.1, marginBottom: 8 }}>
+              What's your<br />biological sex?
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 32, lineHeight: 1.5 }}>
+              Used to calibrate your body analysis and hormone-based recommendations.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+              <SelectCard icon="♂️" title="Male" subtitle="Testosterone-based plan" selected={sex === 'male'} onClick={() => setSex('male')} />
+              <SelectCard icon="♀️" title="Female" subtitle="Estrogen-based plan" selected={sex === 'female'} onClick={() => setSex('female')} />
+            </div>
+            <div style={{ padding: '24px 0 48px' }}>
+              <button onClick={next} disabled={!sex} className="btn-white">Continue</button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── AGE ── */}
+        {step === 'age' && (
+          <motion.div key="age" custom={direction} variants={slideVariants}
+            initial="enter" animate="center" exit="exit" transition={transition}
+            style={wrapStyle}>
+            <StepHeader step={step} onBack={back} />
+            <p className="section-label" style={{ marginBottom: 10 }}>STEP 3 OF 8</p>
+            <h1 style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.1, marginBottom: 8 }}>
+              How old<br />are you?
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 40, lineHeight: 1.5 }}>
+              Age affects your metabolism, recovery, and hormone profile.
+            </p>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <NumericPicker value={age} onChange={setAge} min={13} max={80} unit="years old" />
+            </div>
+            <div style={{ padding: '24px 0 48px' }}>
+              <button onClick={next} className="btn-white">Continue</button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── WEIGHT ── */}
+        {step === 'weight' && (
+          <motion.div key="weight" custom={direction} variants={slideVariants}
+            initial="enter" animate="center" exit="exit" transition={transition}
+            style={wrapStyle}>
+            <StepHeader step={step} onBack={back} />
+            <p className="section-label" style={{ marginBottom: 10 }}>STEP 4 OF 8</p>
+            <h1 style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.1, marginBottom: 8 }}>
+              What's your<br />current weight?
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24, lineHeight: 1.5 }}>
+              Used to calculate your daily calorie and macro targets.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 36 }}>
+              <UnitToggle
+                options={['kg', 'lbs']}
+                value={weightUnit}
+                onChange={(v) => {
+                  const isKg = v === 'kg'
+                  setWeight(isKg
+                    ? Math.round(weight / 2.20462)
+                    : Math.round(weight * 2.20462)
+                  )
+                  setWeightUnit(v as 'kg' | 'lbs')
+                }}
+              />
+            </div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <NumericPicker
+                value={weight}
+                onChange={setWeight}
+                min={weightUnit === 'kg' ? 30 : 66}
+                max={weightUnit === 'kg' ? 250 : 551}
+                unit={weightUnit}
+              />
+            </div>
+            <div style={{ padding: '24px 0 48px' }}>
+              <button onClick={next} className="btn-white">Continue</button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── HEIGHT ── */}
+        {step === 'height' && (
+          <motion.div key="height" custom={direction} variants={slideVariants}
+            initial="enter" animate="center" exit="exit" transition={transition}
+            style={wrapStyle}>
+            <StepHeader step={step} onBack={back} />
+            <p className="section-label" style={{ marginBottom: 10 }}>STEP 5 OF 8</p>
+            <h1 style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.1, marginBottom: 8 }}>
+              How tall<br />are you?
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 24, lineHeight: 1.5 }}>
+              Height helps us assess your ideal body composition.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 36 }}>
+              <UnitToggle
+                options={['cm', 'ft']}
+                value={heightUnit}
+                onChange={(v) => {
+                  if (v === 'ft') {
+                    const totalIn = Math.round(height / 2.54)
+                    setHeightFt(Math.floor(totalIn / 12))
+                    setHeightIn(totalIn % 12)
+                  } else {
+                    setHeight(Math.round(heightFt * 30.48 + heightIn * 2.54))
+                  }
+                  setHeightUnit(v as 'cm' | 'ft')
+                }}
+              />
+            </div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {heightUnit === 'cm' ? (
+                <NumericPicker value={height} onChange={setHeight} min={120} max={250} unit="cm" />
+              ) : (
+                <div style={{ display: 'flex', gap: 24, alignItems: 'flex-end' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <NumericPicker value={heightFt} onChange={setHeightFt} min={3} max={8} unit="ft" />
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <NumericPicker value={heightIn} onChange={setHeightIn} min={0} max={11} unit="in" />
+                  </div>
                 </div>
-                <div className="premium-card" style={{ flex: 1, textAlign: 'center' }}>
-                  <div style={{ marginBottom: 12 }} />
-                  {['intelligent', 'kind', 'rich'].map(t => (
-                    <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                      <span style={{ color: 'var(--red)', fontSize: 15, fontWeight: 700 }}>✗</span>
-                      <span style={{ fontSize: 13, color: 'var(--text-sub)', textTransform: 'capitalize' }}>{t}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
-            <div className="bottom-card">
-              <p style={{ fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.6, marginBottom: 20 }}>
-                This isn&apos;t an opinion. It&apos;s backed by decades of psychology research. The question is — what are you going to do about it?
-              </p>
-              <button onClick={next} className="btn-white">Next</button>
+            <div style={{ padding: '24px 0 48px' }}>
+              <button onClick={next} className="btn-white">Continue</button>
             </div>
           </motion.div>
         )}
 
-        {/* ── EDU: The Dating Market Is Brutal ── */}
-        {step === 'edu_dating' && (
-          <motion.div key="dating" {...slide} style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '48px 24px 0' }}>
-              <BackBtn onBack={back} />
-              <p className="section-label" style={{ marginBottom: 8 }}>DATING REALITY</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <span className="teal-badge">Top 10%</span>
-                <span style={{ fontSize: 13, color: 'var(--text-sub)' }}>of men get 80% of matches</span>
-              </div>
-              <DatingChart />
+        {/* ── GYM ── */}
+        {step === 'gym' && (
+          <motion.div key="gym" custom={direction} variants={slideVariants}
+            initial="enter" animate="center" exit="exit" transition={transition}
+            style={wrapStyle}>
+            <StepHeader step={step} onBack={back} />
+            <p className="section-label" style={{ marginBottom: 10 }}>STEP 6 OF 8</p>
+            <h1 style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.1, marginBottom: 8 }}>
+              Where do<br />you train?
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 32, lineHeight: 1.5 }}>
+              We'll design your workout around the equipment you have access to.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+              <SelectCard icon="🏋️" title="Gym" subtitle="Full equipment access" selected={gym === 'gym'} onClick={() => setGym('gym')} />
+              <SelectCard icon="🏠" title="Home" subtitle="Bodyweight & minimal gear" selected={gym === 'home'} onClick={() => setGym('home')} />
             </div>
-            <div className="bottom-card">
-              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 10, letterSpacing: '-0.02em' }}>The Dating Market Is Brutal</h2>
-              <p style={{ fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.6, marginBottom: 20 }}>
-                The top 10% of guys get 80% of the matches. If you&apos;re not in that group, you&apos;re invisible. Looks can be fixed — most people just don&apos;t know how.
-              </p>
-              <button onClick={next} className="btn-white">Next</button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* ── EDU: Attractiveness Influence ── */}
-        {step === 'edu_influence' && (
-          <motion.div key="influence" {...slide} style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '48px 24px 0' }}>
-              <BackBtn onBack={back} />
-              <p className="section-label" style={{ marginBottom: 12 }}>ATTRACTIVENESS IMPACT</p>
-              <h1 style={{ fontSize: 26, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 28 }}>
-                Looks Change Everything
-              </h1>
-              <InfluenceBar label="Dating"       pct={80} teal  delay={300} />
-              <InfluenceBar label="Popularity"   pct={65}       delay={450} />
-              <InfluenceBar label="Career Oppt." pct={35}       delay={600} />
-              <InfluenceBar label="Income"       pct={30}       delay={750} />
-            </div>
-            <div className="bottom-card">
-              <h2 style={{ fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 10, letterSpacing: '-0.02em' }}>The Fix Exists</h2>
-              <p style={{ fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.6, marginBottom: 20 }}>
-                99% of people don&apos;t realize how much attractiveness impacts their lives, especially for dating.
-              </p>
-              <button onClick={next} className="btn-white">Next</button>
+            <div style={{ padding: '24px 0 48px' }}>
+              <button onClick={next} disabled={!gym} className="btn-white">Continue</button>
             </div>
           </motion.div>
         )}
 
-        {/* ── QUIZ: Name ── */}
-        {step === 'quiz_name' && (
-          <motion.div key="name" {...slide} style={colStyle}>
-            <BackBtn onBack={back} />
-            <ProgressBar step={step} />
-            <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>First, what&apos;s your name?</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 32 }}>We&apos;ll build your personal glow-up plan around you.</p>
+        {/* ── NAME ── */}
+        {step === 'name' && (
+          <motion.div key="name" custom={direction} variants={slideVariants}
+            initial="enter" animate="center" exit="exit" transition={transition}
+            style={wrapStyle}>
+            <StepHeader step={step} onBack={back} />
+            <p className="section-label" style={{ marginBottom: 10 }}>STEP 7 OF 8</p>
+            <h1 style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.1, marginBottom: 8 }}>
+              What should<br />we call you?
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 32, lineHeight: 1.5 }}>
+              Your plan will be personally addressed to you.
+            </p>
             <input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Your name"
+              placeholder="Your first name"
               className="premium-input"
+              autoFocus
               style={{ marginBottom: 16 }}
             />
             <div style={{ flex: 1 }} />
-            <button onClick={() => next()} className="btn-ghost" style={{ marginBottom: 12 }}>Skip</button>
-            <button
-              onClick={() => { if (name.trim()) { setState({ name: name.trim() }); next() } }}
-              disabled={!name.trim()}
-              className="btn-white"
-              style={{ marginBottom: 48 }}
-            >
-              Next
-            </button>
+            <div style={{ padding: '0 0 48px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button onClick={next} disabled={!name.trim()} className="btn-white">
+                {name.trim() ? `Continue as ${name.trim()}` : 'Continue'}
+              </button>
+              <button onClick={() => { next() }} className="btn-ghost">Skip for now</button>
+            </div>
           </motion.div>
         )}
 
         {/* ── UPLOAD ── */}
         {step === 'upload' && (
-          <motion.div key="upload" {...slide} style={colStyle}>
-            <BackBtn onBack={back} />
-            <ProgressBar step={step} />
-            <h1 style={{ fontSize: 32, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 8 }}>Upload your photo</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 20 }}>Full body photo works best for accurate analysis</p>
+          <motion.div key="upload" custom={direction} variants={slideVariants}
+            initial="enter" animate="center" exit="exit" transition={transition}
+            style={wrapStyle}>
+            <StepHeader step={step} onBack={back} />
+            <p className="section-label" style={{ marginBottom: 10 }}>STEP 8 OF 8</p>
+            <h1 style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.1, marginBottom: 8 }}>
+              Upload your<br />physique photo
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--text-sub)', marginBottom: 20, lineHeight: 1.5 }}>
+              A full-body front-facing photo gives the most accurate AI analysis.
+            </p>
 
+            {/* Upload zone */}
             <div
-              style={{
-                flexShrink: 0, height: 320, borderRadius: 20,
-                border: `2px dashed ${isDragging ? 'var(--teal)' : 'rgba(255,255,255,0.12)'}`,
-                background: isDragging ? 'rgba(92,224,208,0.04)' : 'rgba(255,255,255,0.02)',
-                overflow: 'hidden', cursor: 'pointer',
-                transition: 'border-color 0.2s, background 0.2s',
-                position: 'relative',
-              }}
               onClick={() => fileInputRef.current?.click()}
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
               onDragLeave={() => setIsDragging(false)}
               onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
+              style={{
+                flexShrink: 0,
+                height: 280,
+                borderRadius: 24,
+                border: `1.5px dashed ${isDragging ? 'var(--teal)' : imagePreview ? 'rgba(92,224,208,0.4)' : 'rgba(255,255,255,0.12)'}`,
+                background: isDragging ? 'rgba(92,224,208,0.04)' : imagePreview ? 'transparent' : 'rgba(255,255,255,0.02)',
+                overflow: 'hidden',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                position: 'relative',
+              }}
             >
               {imagePreview ? (
-                <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', padding: '0 24px' }}>
+                <>
+                  <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <div style={{
-                    width: 56, height: 56, borderRadius: '50%',
-                    border: '2px solid var(--teal)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16,
-                    boxShadow: '0 0 20px rgba(92,224,208,0.2)',
+                    position: 'absolute', bottom: 12, right: 12,
+                    background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
+                    borderRadius: 20, padding: '6px 14px',
+                    fontSize: 12, fontWeight: 600, color: 'var(--teal)',
+                    border: '1px solid rgba(92,224,208,0.3)',
                   }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path d="M12 5v14M5 12h14" stroke="var(--teal)" strokeWidth="2.5" strokeLinecap="round" />
+                    ✓ Photo added — tap to change
+                  </div>
+                </>
+              ) : (
+                <div style={{
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
+                  height: '100%', textAlign: 'center', padding: '0 24px',
+                }}>
+                  <div style={{
+                    width: 60, height: 60, borderRadius: '50%',
+                    border: '1.5px solid var(--teal)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginBottom: 16,
+                    background: 'rgba(92,224,208,0.06)',
+                    boxShadow: '0 0 24px rgba(92,224,208,0.15)',
+                  }}>
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 5v14M5 12h14" stroke="var(--teal)" strokeWidth="2.2" strokeLinecap="round"/>
                     </svg>
                   </div>
-                  <p style={{ fontSize: 16, fontWeight: 600, color: '#fff', marginBottom: 6 }}>Tap to upload</p>
-                  <p style={{ fontSize: 13, color: 'var(--text-dim)' }}>or drag your photo here</p>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 6 }}>Tap to upload photo</p>
+                  <p style={{ fontSize: 13, color: 'var(--text-dim)' }}>JPG, PNG — full body works best</p>
                 </div>
               )}
             </div>
@@ -344,21 +630,34 @@ export default function OnboardingPage() {
               onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]) }}
             />
 
+            {/* Privacy note */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 12, padding: '10px 14px',
+              marginTop: 14,
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L3 7v5c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V7L12 2z" stroke="rgba(255,255,255,0.3)" strokeWidth="1.8" fill="none"/>
+              </svg>
+              <span style={{ fontSize: 12, color: 'var(--text-dim)', lineHeight: 1.4 }}>
+                Your photo is processed securely and never stored permanently.
+              </span>
+            </div>
+
             <div style={{ flex: 1 }} />
-            <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-dim)', marginBottom: 12 }}>
-              Private &amp; secure — your photo is never stored permanently
-            </p>
-            <button
-              onClick={handleSubmit}
-              disabled={!imagePreview}
-              className="btn-teal"
-              style={{ marginBottom: 48 }}
-            >
-              Analyze My Physique
-            </button>
+            <div style={{ padding: '20px 0 48px' }}>
+              <button
+                onClick={handleSubmit}
+                disabled={!imagePreview}
+                className="btn-teal"
+              >
+                Analyse My Physique →
+              </button>
+            </div>
           </motion.div>
         )}
-
       </AnimatePresence>
     </main>
   )
